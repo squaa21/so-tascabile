@@ -1,0 +1,1411 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ECF0F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1218" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SO Tascabile">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317202A'/%3E%3Ctext x='32' y='42' font-family='monospace' font-size='26' font-weight='700' fill='%23FF6A13' text-anchor='middle'%3ESO%3C/text%3E%3C/svg%3E">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>SO Tascabile</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: una colonna da telefono; home = percorso a zig-zag dei moduli, lezione = schermo pieno con barra azioni in basso */
+:root{
+  --bg:#ECF0F5; --surface:#FFFFFF; --surface-2:#F4F6F9; --ink:#17202A; --muted:#5A6777; --line:#D2DAE4;
+  --accent:#FF6A13; --accent-deep:#C94F06; --accent-soft:#FFE6D6; --on-accent:#FFFFFF;
+  --ok:#1E9A53; --ok-deep:#14753E; --ok-soft:#DCF4E6;
+  --bad:#DE3B42; --bad-deep:#A82A30; --bad-soft:#FCE3E3;
+  --gold:#E9A800; --code-bg:#18212C; --code-ink:#E4EBF2; --code-dim:#7F90A3;
+  --f-display:"Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1218; --surface:#161D26; --surface-2:#1C2530; --ink:#E6ECF2; --muted:#93A1B2; --line:#2A3441;
+  --accent:#FF7A2B; --accent-deep:#B9500F; --accent-soft:#3A2416; --on-accent:#FFFFFF;
+  --ok:#33C072; --ok-deep:#1D8A4C; --ok-soft:#14321F;
+  --bad:#FF6268; --bad-deep:#A8323A; --bad-soft:#3A1B1E;
+  --gold:#F5BD1F; --code-bg:#0A0F15; --code-ink:#E4EBF2; --code-dim:#71839A; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1218; --surface:#161D26; --surface-2:#1C2530; --ink:#E6ECF2; --muted:#93A1B2; --line:#2A3441;
+  --accent:#FF7A2B; --accent-deep:#B9500F; --accent-soft:#3A2416; --on-accent:#FFFFFF;
+  --ok:#33C072; --ok-deep:#1D8A4C; --ok-soft:#14321F;
+  --bad:#FF6268; --bad-deep:#A8323A; --bad-soft:#3A1B1E;
+  --gold:#F5BD1F; --code-bg:#0A0F15; --code-ink:#E4EBF2; --code-dim:#71839A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:50;background:var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+b,strong{font-weight:800}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.screen{min-height:100%}
+.screen[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);font-weight:800;letter-spacing:-.01em;text-wrap:balance;margin:0}
+.muted{color:var(--muted)}
+.label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:12px 18px;border-radius:14px;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 4px 0 var(--accent-deep);transition:transform .06s,box-shadow .06s}
+.btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 0 0 var(--accent-deep)}
+.btn:disabled{background:var(--line);color:var(--muted);box-shadow:0 4px 0 var(--line);cursor:default}
+.btn.ok{background:var(--ok);box-shadow:0 4px 0 var(--ok-deep)}
+.btn.bad{background:var(--bad);box-shadow:0 4px 0 var(--bad-deep)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.ghost:active{box-shadow:0 0 0 var(--line)}
+.iconbtn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;color:var(--muted)}
+.iconbtn:active{background:var(--surface-2)}
+svg.i{width:22px;height:22px;flex:none}
+
+/* HOME */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:10px 8px}
+.top .row{display:flex;align-items:center;gap:8px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:20px;flex:1;display:flex;align-items:center;gap:8px;min-width:0}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--f-mono);font-size:13px;font-weight:600;flex:none}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line);font-weight:800;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill.flame{color:var(--accent)}
+.pill.flame.off{color:var(--muted)}
+.pill .i{width:18px;height:18px}
+.examline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--muted)}
+.examline b{color:var(--ink)}
+.goalbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;flex:1;max-width:160px}
+.goalbar>i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .4s}
+
+.hero{margin-top:14px;background:var(--ink);color:var(--bg);border-radius:22px;padding:18px 18px 20px;position:relative;overflow:hidden}
+.hero h2{font-size:26px;line-height:1.1;color:var(--bg)}
+.hero p{margin:6px 0 16px;opacity:.75;font-size:14px}
+.hero .term{font-family:var(--f-mono);font-size:12px;opacity:.6;margin-bottom:8px}
+.hero .btn{max-width:260px}
+.hero::after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;border:18px solid var(--accent);opacity:.9}
+
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mode{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:var(--r);background:var(--surface);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);text-align:left;min-width:0}
+.mode:active{transform:translateY(3px);box-shadow:none}
+.mode .t{font-weight:800;font-size:15px;line-height:1.2}
+.mode .d{font-size:12.5px;color:var(--muted);line-height:1.3}
+.mode .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}
+.mode .ic svg{width:20px;height:20px}
+.mode:disabled{opacity:.55}
+.ic.c1{background:var(--bad-soft);color:var(--bad)}
+.ic.c2{background:var(--accent-soft);color:var(--accent)}
+.ic.c3{background:var(--ok-soft);color:var(--ok)}
+.ic.c4{background:var(--surface-2);color:var(--ink)}
+
+.pathhead{display:flex;align-items:baseline;justify-content:space-between;margin:28px 0 6px}
+.pathhead h3{font-size:20px}
+.path{display:flex;flex-direction:column;align-items:center;gap:18px;padding:12px 0 40px}
+.unit{display:flex;flex-direction:column;align-items:center;gap:6px;width:150px}
+.node{position:relative;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ring) calc(var(--p)*1%),var(--line) 0)}
+.node .core{width:68px;height:68px;border-radius:50%;background:var(--surface);display:grid;place-items:center;box-shadow:0 5px 0 var(--line);font-family:var(--f-display);font-weight:800;font-size:24px;transition:transform .06s}
+.unit:active .core{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+.node.done .core{background:var(--gold);color:#3A2A00;box-shadow:0 5px 0 #B98500}
+.node.started .core{background:var(--accent);color:var(--on-accent);box-shadow:0 5px 0 var(--accent-deep)}
+.unit .nm{font-weight:800;font-size:14px;text-align:center;line-height:1.2}
+.unit .tag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:99px}
+.unit .pc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* SHEET */
+.scrim{position:fixed;inset:0;background:rgba(10,14,20,.45);z-index:60;opacity:0;transition:opacity .2s}
+.scrim.on{opacity:1}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--surface);border-radius:24px 24px 0 0;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);max-height:88%;overflow:auto}
+.sheet.on{transform:none}
+.sheet .wrap{padding-block:10px calc(20px + env(safe-area-inset-bottom,0px))}
+.grab{width:42px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
+.sheet h2{font-size:24px}
+.sheet .sub{color:var(--muted);margin:4px 0 14px;font-size:14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.meter{height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter>i{display:block;height:100%;background:var(--gold);border-radius:99px}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 18px}
+.stat{background:var(--surface-2);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.seg{display:flex;gap:6px}
+.seg button{padding:8px 12px;border-radius:10px;border:2px solid var(--line);font-weight:700;font-size:14px}
+.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+/* LESSON */
+#lesson{display:flex;flex-direction:column;height:100%;overflow:hidden}
+#lesson>.wrap{width:100%}
+.hero>*{position:relative;z-index:1}
+.lhead{display:flex;align-items:center;gap:10px;padding-block:10px}
+.prog{flex:1;height:16px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog>i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .35s cubic-bezier(.2,.8,.2,1);position:relative}
+.prog>i::after{content:"";position:absolute;left:8px;right:8px;top:4px;height:4px;border-radius:9px;background:rgba(255,255,255,.35)}
+.combo{font-weight:800;color:var(--accent);font-size:14px;min-width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.lbody{flex:1;overflow-y:auto;padding-block:8px 24px;-webkit-overflow-scrolling:touch}
+.kind{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.kind .modtag{font-size:12px;font-weight:700;color:var(--muted);margin-left:auto;text-align:right}
+.q{font-size:20px;font-weight:700;line-height:1.35;margin:0 0 16px;text-wrap:pretty}
+.q.small{font-size:17px}
+pre.code{background:var(--code-bg);color:var(--code-ink);font-family:var(--f-mono);font-size:12.5px;line-height:1.75;padding:14px;border-radius:14px;overflow-x:auto;margin:0 0 16px;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:4}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--surface);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);text-align:left;font-weight:600;font-size:16px;line-height:1.3}
+.opt .k{flex:none;width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 3px 0 var(--accent)}
+.opt[aria-pressed="true"] .k{border-color:var(--accent);color:var(--accent)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft);box-shadow:0 3px 0 var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);box-shadow:0 3px 0 var(--bad)}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tfrow .opt{justify-content:center;font-size:18px;font-weight:800;padding:22px 10px}
+.fillq{font-size:19px;line-height:2.1;font-weight:600;margin:0 0 18px}
+.slot{display:inline-block;min-width:3ch;padding:0 8px;margin:0 2px;border-radius:8px;border-bottom:3px solid var(--muted);background:var(--surface-2);font-weight:700;line-height:1.6;vertical-align:baseline;color:var(--ink);font-size:inherit}
+.slot.filled{background:var(--accent-soft);border-bottom-color:var(--accent)}
+.slot.right{background:var(--ok-soft);border-bottom-color:var(--ok)}
+.slot.wrong{background:var(--bad-soft);border-bottom-color:var(--bad);text-decoration:line-through}
+pre.code .slot{font-family:var(--f-mono);font-size:12.5px;line-height:1.5;background:#2A3645;color:#FFFFFF;border-bottom-color:var(--code-dim);padding:0 6px}
+pre.code .slot.filled{background:#5A3410;border-bottom-color:var(--accent)}
+pre.code .slot.right{background:#174A2D;border-bottom-color:var(--ok)}
+pre.code .slot.wrong{background:#5A1E22;border-bottom-color:var(--bad)}
+.bank{display:flex;flex-wrap:wrap;gap:8px;padding-top:6px}
+.chip{padding:10px 14px;border-radius:12px;background:var(--surface);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);font-weight:700;font-size:15px}
+.chip.mono{font-family:var(--f-mono);font-size:13.5px;font-weight:600}
+.chip.used{background:var(--line);border-color:var(--line);box-shadow:none;color:transparent;pointer-events:none}
+.chip:active{transform:translateY(3px);box-shadow:none}
+.ordans{display:flex;flex-direction:column;gap:8px;min-height:64px;padding:10px;border:2px dashed var(--line);border-radius:14px;margin-bottom:14px}
+.ordans:empty::before{content:"Tocca i passi qui sotto nell'ordine giusto";color:var(--muted);font-size:14px;padding:8px}
+.ordit{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:12px;background:var(--surface);border:2px solid var(--line);box-shadow:0 3px 0 var(--line);font-weight:600;font-size:15px;line-height:1.3;width:100%}
+.ordit .n{flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:800;display:grid;place-items:center}
+.ordpool{display:flex;flex-direction:column;gap:8px}
+.ordpool .ordit.used{display:none}
+.ordit.right{border-color:var(--ok)}
+.ordit.wrong{border-color:var(--bad)}
+.numin{display:flex;gap:10px;align-items:center}
+.numin input{flex:1;min-width:0;font:inherit;font-family:var(--f-display);font-size:30px;font-weight:800;padding:12px 16px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums}
+.numin input:focus{border-color:var(--accent);outline:none}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 4px 0 var(--line)}
+.card .front{font-size:20px;font-weight:700;line-height:1.35}
+.card .back{margin-top:16px;padding-top:16px;border-top:2px dashed var(--line);font-size:16px;line-height:1.5}
+.lfoot{position:relative;border-top:2px solid var(--line);background:var(--bg)}
+.lfoot .wrap{padding-block:14px calc(14px + env(safe-area-inset-bottom,0px))}
+.lfoot .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fb{position:absolute;left:0;right:0;bottom:0;transform:translateY(100%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:5}
+.fb.on{transform:none}
+.fb.good{background:var(--ok-soft)}
+.fb.bad{background:var(--bad-soft)}
+.fb .wrap{padding-block:16px calc(14px + env(safe-area-inset-bottom,0px))}
+.fb h3{display:flex;align-items:center;gap:8px;font-size:21px}
+.fb.good h3{color:var(--ok)} .fb.bad h3{color:var(--bad)}
+.fb .sol{margin:8px 0 4px;font-weight:700;color:var(--ink);font-size:15px;white-space:pre-wrap;word-break:break-word}
+.fb .sol.mono{font-family:var(--f-mono);font-size:13px;font-weight:600}
+.fb .why{margin:4px 0 14px;font-size:14.5px;color:var(--ink);opacity:.85;max-height:28vh;overflow:auto}
+
+/* FLASHCARDS */
+.deck{perspective:1200px;margin-top:8px}
+.fcard{position:relative;min-height:340px;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1);cursor:pointer}
+.fcard.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:24px;display:flex;flex-direction:column;border:2px solid var(--line);box-shadow:0 5px 0 var(--line);background:var(--surface);overflow:auto}
+.face.b{transform:rotateY(180deg);background:var(--surface)}
+.face .ft{font-family:var(--f-display);font-size:25px;font-weight:800;line-height:1.2;margin:auto 0;text-wrap:balance}
+.face .bt{font-size:17px;line-height:1.55;margin:auto 0}
+.face .hint{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+.face .mt{font-size:12px;font-weight:700;color:var(--muted)}
+
+/* RESULT */
+.res{text-align:center;padding-block:28px 20px}
+.res .big{font-family:var(--f-display);font-size:34px;font-weight:800;line-height:1.1;margin:14px 0 6px}
+.res .burst{width:120px;height:120px;margin:0 auto;border-radius:50%;background:var(--gold);display:grid;place-items:center;color:#3A2A00;font-family:var(--f-display);font-size:40px;font-weight:800;box-shadow:0 6px 0 #B98500;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+.res .stats3{margin-top:22px}
+.review{text-align:left;margin:18px 0}
+.review li{margin:8px 0;font-size:14.5px}
+.review ul{padding-left:18px;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:80;pointer-events:none;max-width:90%}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.syncnote{font-size:12px;color:var(--muted);text-align:center;padding-bottom:28px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div id="home" class="screen">
+  <div class="top"><div class="wrap">
+    <div class="row">
+      <div class="brand"><span class="mark">SO</span><span>Tascabile</span></div>
+      <span class="pill flame" id="streakPill" title="Giorni di fila"><svg class="i" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3.2-.6 5-2 6.6C8.6 10.2 7 12 7 14.6A5 5 0 0 0 12 20a5 5 0 0 0 5-5.2c0-2-1-3.4-2-4.6.1 1.5-.5 2.6-1.6 3 .6-3.2-.3-7-1.4-11.2Z"/></svg><span id="streakN">0</span></span>
+      <span class="pill" title="XP totali"><svg class="i" viewBox="0 0 24 24" fill="var(--gold)"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg><span id="xpN">0</span></span>
+      <button class="iconbtn" id="setBtn" aria-label="Impostazioni"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+    </div>
+    <div class="examline"><span id="examTxt">Esame il 3 novembre</span><span style="display:flex;align-items:center;gap:8px"><span id="goalTxt">0/100 XP</span><span class="goalbar"><i id="goalBar" style="width:0"></i></span></span></div>
+  </div></div>
+  <div class="wrap">
+    <section class="hero">
+      <div class="term">$ ./pausa --domande 5</div>
+      <h2>Hai due minuti?</h2>
+      <p id="heroTxt">Cinque domande dai punti che ricordi meno. Perfetta mentre aspetti.</p>
+      <button class="btn" id="quickBtn">Inizia la pausa</button>
+    </section>
+    <div class="modes">
+      <button class="mode" id="mErr"><span class="ic c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg></span><span class="t">Ripassa gli errori</span><span class="d" id="errD">Nessun errore per ora</span></button>
+      <button class="mode" id="mFc"><span class="ic c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v10"/></svg></span><span class="t">Flashcard</span><span class="d">Definizioni da orale, giro rapido</span></button>
+      <button class="mode" id="mSim"><span class="ic c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m5 12 4 4 10-10"/></svg></span><span class="t">Simula le crocette</span><span class="d">20 domande da tutto il corso</span></button>
+      <button class="mode" id="mPrat"><span class="ic c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4"/></svg></span><span class="t">Prova pratica</span><span class="d">Bash, fork/exec, IPC, Docker da completare</span></button>
+    </div>
+    <div class="pathhead"><h3>Il percorso</h3><span class="label" id="overall">0% padroneggiato</span></div>
+    <div class="path" id="path"></div>
+    <div class="syncnote" id="syncNote">Progressi salvati su questo dispositivo</div>
+  </div>
+</div>
+
+<div id="lesson" class="screen" hidden>
+  <div class="wrap lhead">
+    <button class="iconbtn" id="quitBtn" aria-label="Esci"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="prog"><i id="progBar" style="width:0"></i></div>
+    <span class="combo" id="combo"></span>
+  </div>
+  <div class="lbody"><div class="wrap" id="qArea"></div></div>
+  <div class="lfoot">
+    <div class="wrap" id="footArea"></div>
+    <div class="fb" id="fb"><div class="wrap">
+      <h3 id="fbTitle"></h3>
+      <div class="sol" id="fbSol"></div>
+      <div class="why" id="fbWhy"></div>
+      <button class="btn" id="fbBtn">Continua</button>
+    </div></div>
+  </div>
+</div>
+
+<div id="result" class="screen" hidden><div class="wrap res" id="resArea"></div></div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="wrap" id="sheetArea"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Banca domande — moduli 1–8. Formato:
+// ['fc', fronte, retro]
+// ['mc', domanda, [GIUSTA, sbagliata, ...], spiegazione]
+// ['tf', affermazione, true/false, spiegazione]
+// ['fill', testo con [[risposte]], [distrattori], spiegazione]
+// ['code', consegna, codice con [[risposte]], [distrattori], spiegazione]
+// ['ord', consegna, [passi in ordine], spiegazione]
+// ['num', domanda, risposta, spiegazione, tolleranza?]
+const R = String.raw;
+const MODULES = [];
+
+MODULES.push({ id: 'intro', title: 'Introduzione', sub: 'Kernel, user/kernel mode, strutture', items: [
+['fc', R`Cos'è il kernel?`, R`Il software **mediatore tra applicazioni e hardware**. Risiede in memoria e gira in **kernel mode**.`],
+['fc', R`Quando entra in esecuzione il kernel?`, R`Solo in risposta a **tre eventi**: system call, eccezioni, interrupt.`],
+['fc', R`User mode e kernel mode: differenza e perché esistono`, R`In kernel mode si esegue **qualsiasi istruzione** e si accede a tutto l'hardware; in user mode solo un **sottoinsieme**. Serve per **protezione**: un programma non può danneggiare il sistema. L'unico passaggio è una **system call**.`],
+['fc', R`Multiprogrammazione vs timesharing`, R`Multiprogrammazione: più job in memoria, quando uno aspetta l'I/O la CPU passa a un altro. Timesharing: **variante** in cui ognuno usa la CPU **a turno per un quanto**, grazie al **timer interrupt**.`],
+['fc', R`Quali astrazioni fornisce un SO?`, R`**File** (al posto dei byte su disco), **spazio di indirizzamento** (memoria), **processi/thread** (esecuzione), **socket** (rete).`],
+['fc', R`Monolitico vs microkernel`, R`Monolitico: tutto in kernel mode, **veloce** ma grande e poco robusto. Microkernel: nel kernel solo il minimo, il resto processi user mode; **robusto** ma più **lento** (messaggi).`],
+['mc', R`Secondo il libro del corso (Tanenbaum), la shell…`, [R`non fa parte del SO`, R`è il cuore del kernel`, R`gira sempre in kernel mode`, R`è una system call`], R`Shell e GUI non fanno parte del SO secondo il libro del corso; altri testi le includono.`],
+['mc', R`Quanti livelli di privilegio (ring) hanno le CPU Intel, e quanti se ne usano?`, [R`4, ma se ne usano 2 (0 e 3)`, R`2, e si usano tutti e 2`, R`4, e si usano tutti e 4`, R`3, se ne usano 2`], R`Ring 0–3 codificati su 2 bit (CPL nel registro CS); in pratica ring 0 = kernel, ring 3 = utente.`],
+['mc', R`Quale di queste istruzioni NON è privilegiata?`, [R`mov`, R`cli`, R`hlt`, R`out`], R`cli, sti, iret, hlt, in/out sono privilegiate; mov, add, sub, jmp no.`],
+['mc', R`Quale di queste istruzioni è privilegiata?`, [R`cli`, R`add`, R`jmp`, R`sub`], R`cli disabilita gli interrupt: solo il kernel può farlo.`],
+['mc', R`Che tipo di kernel è Linux?`, [R`Monolitico (con moduli caricabili)`, R`Microkernel`, R`Ibrido`, R`A livelli`], R`Linux, BSD, System V sono monolitici; i moduli si gestiscono con lsmod, insmod, rmmod.`],
+['mc', R`Windows e macOS hanno un kernel…`, [R`ibrido`, R`monolitico`, R`microkernel puro`, R`a livelli`], R`Ibrido: via di mezzo, i driver girano in kernel mode.`],
+['mc', R`MINIX 3 e Mach sono esempi di…`, [R`microkernel`, R`kernel monolitico`, R`kernel ibrido`, R`sistemi batch`], R`Il kernel di MINIX 3 è di circa 15.000 righe di C.`],
+['mc', R`Qual è il vero pregio del microkernel?`, [R`Robustezza ai guasti`, R`Velocità`, R`Un unico binario`, R`Niente scambio di messaggi`], R`Meno codice in kernel mode = meno guasti fatali. Il prezzo sono le prestazioni.`],
+['mc', R`Il timesharing si basa su…`, [R`il timer interrupt`, R`il DMA`, R`lo swapping`, R`l'istruzione TSL`], R`Il timer interrupt ridà il controllo al kernel allo scadere del quanto.`],
+['mc', R`Un programma C fa printf("Ciao"). In quale punto si entra in kernel mode?`, [R`Nella system call write`, R`Nella printf`, R`Quando parte ./hello`, R`Nella libc, prima della printf`], R`printf è una funzione di libreria (user mode) che invoca la system call write.`],
+['mc', R`Quale comando mostra le system call fatte da un programma?`, [R`strace`, R`ldd`, R`lsmod`, R`ps`], R`strace ./hello mostra in fondo write(1, "Ciao\n", 5). ldd mostra le librerie.`],
+['mc', R`ldd ./hello mostra…`, [R`le librerie usate (es. libc.so.6)`, R`le system call`, R`i processi figli`, R`i moduli del kernel`], R`ldd elenca le librerie condivise del programma.`],
+['mc', R`Multiprogrammazione e timesharing nascono nella…`, [R`3ª generazione (circuiti integrati)`, R`1ª generazione (valvole)`, R`2ª generazione (transistor)`, R`5ª generazione (mobile)`], R`3ª generazione: IBM 360, MULTICS, UNIX. I sistemi batch sono della 2ª.`],
+['mc', R`Programmi applicativi come browser e compilatori…`, [R`non sono mai SO`, R`fanno parte del SO in senso ampio`, R`girano in kernel mode`, R`sono moduli caricabili`], R`Il SO in senso ampio = kernel + sistema di base + utilità + librerie di sistema. Le applicazioni no.`],
+['tf', R`Il timesharing è una variante della multiprogrammazione.`, true, R`Più job in memoria, e in più ognuno ha la CPU a turno per un quanto.`],
+['tf', R`Il microkernel è più veloce del kernel monolitico.`, false, R`È più robusto, non più veloce: i messaggi costano più delle chiamate a funzione.`],
+['tf', R`In ogni istante la CPU è o in user mode o in kernel mode.`, true, R`Mai entrambe, mai nessuna.`],
+['tf', R`Un programma in user mode può accedere direttamente all'I/O con in/out.`, false, R`in/out sono privilegiate: serve una system call.`],
+['tf', R`Dall'esperienza di OS/360: aggiungere persone a un progetto in ritardo lo ritarda ancora di più.`, true, R`OS/360: milioni di righe, migliaia di bug, costo 4 volte la stima. Nel 1968 nasce l'ingegneria del software.`],
+['fill', R`Il kernel esegue solo in risposta a [[system call]], [[eccezioni]] e [[interrupt]].`, [R`thread`, R`fork`, R`page fault`], R`Sono i tre eventi che attivano il kernel.`],
+['fill', R`Genealogia: MULTICS → [[UNIX]] → [[Linux]]. macOS deriva da [[BSD]].`, [R`Windows`, R`DOS`, R`Android`], R`Linux è un clone di UNIX; Android è uno strato sopra Linux; macOS deriva da Berkeley UNIX (BSD).`],
+['fill', R`Nel multiplexing la CPU è condivisa nel [[tempo]], la memoria nello [[spazio]].`, [R`kernel`, R`disco`], R`CPU usata a turno; memoria divisa tra più processi.`],
+['ord', R`Dal printf all'hardware: metti in ordine dall'alto (user) al basso (hardware).`, [R`./hello (applicazione)`, R`printf() (libreria C)`, R`write() (system call)`, R`kernel → hardware`], R`La system call write è il punto in cui si entra nel kernel.`],
+]});
+
+MODULES.push({ id: 'hw', title: 'Hardware e interrupt', sub: 'Interrupt, ISR, trap, system call', items: [
+['fc', R`System call, eccezione, interrupt: differenza`, R`**System call**: richiesta voluta dal programma, sincrona. **Eccezione**: evento non voluto causato dall'istruzione (es. divisione per zero), sincrona. **Interrupt hardware**: causato da un dispositivo esterno, **asincrono**.`],
+['fc', R`Cos'è una ISR e come la trova la CPU?`, R`Routine del kernel (in C) che gestisce un interrupt. L'interrupt controller mette sul bus l'**interrupt vector**; la CPU lo usa come indice nella **tabella dei vettori** (IDT in Linux).`],
+['fc', R`Cos'è una trap (nel libro del corso)?`, R`L'**istruzione** con cui un programma passa da user a kernel mode: oggi **syscall** (x86-64), prima **int $0x80**. Il termine ha anche altri significati.`],
+['fc', R`Come avviene una system call su x86-64?`, R`Numero in **rax**, parametri in rdi, rsi, rdx, r10, r8, r9. Istruzione **syscall** → kernel mode. Il kernel usa rax per trovare l'handler in una **tabella di puntatori**, lo esegue e torna.`],
+['fc', R`Cosa succede a un programma che divide per zero?`, R`Eccezione → il kernel invia **SIGFPE**. Se c'è un handler registrato con signal() viene eseguito, altrimenti il SO **termina** il processo.`],
+['fc', R`Registri PC, SP, PSW`, R`**PC**: prossima istruzione. **SP**: cima dello stack. **PSW**: codici di condizione e **modalità user/kernel**.`],
+['mc', R`Quale di questi eventi è asincrono?`, [R`Interrupt hardware`, R`System call`, R`Divisione per zero`, R`Accesso a indirizzo non valido`], R`Asincrono = causato da una sorgente esterna in un momento qualsiasi.`],
+['mc', R`Nella IDT di Linux il vettore 128 è riservato a…`, [R`system call`, R`eccezioni`, R`timer`, R`tastiera`], R`IDT: 256 voci; 0–31 eccezioni, 128 (0x80) system call, il resto interrupt hardware.`],
+['mc', R`Nella IDT di Linux i vettori 0–31 sono…`, [R`eccezioni`, R`system call`, R`interrupt dei dischi`, R`liberi`], R`0–31 eccezioni, 128 system call.`],
+['mc', R`Su x86-64 il numero della system call va nel registro…`, [R`rax`, R`rdi`, R`rsp`, R`eax`], R`eax è l'equivalente a 32 bit. I parametri vanno in rdi, rsi, rdx, r10, r8, r9.`],
+['mc', R`Quanti parametri al massimo passano nei registri in una system call?`, [R`6`, R`4`, R`8`, R`2`], R`Se ne servono di più, uno diventa un puntatore a una struttura.`],
+['mc', R`Oggi su x86-64 l'istruzione trap è…`, [R`syscall`, R`int $0x80`, R`iret`, R`hlt`], R`int $0x80 (interrupt software 128) è il metodo vecchio a 32 bit.`],
+['mc', R`I passi 1–2 della gestione di un interrupt (salvare il PC, caricare l'indirizzo della ISR) li fa…`, [R`l'hardware`, R`la ISR in C`, R`lo scheduler`, R`il driver`], R`Dal passo 3 in poi è software; i passi 3–4 sono uguali per tutti gli interrupt.`],
+['mc', R`Nella gestione di un interrupt, il context switch…`, [R`avviene al passo 8, solo se lo scheduler sceglie un altro processo`, R`avviene sempre al passo 1`, R`avviene sempre al passo 9`, R`non avviene mai`], R`Se lo scheduler sceglie un processo diverso, il passo 9 del processo interrotto avverrà più tardi.`],
+['mc', R`Una divisione per zero diventa il segnale…`, [R`SIGFPE`, R`SIGSEGV`, R`SIGILL`, R`SIGBUS`], R`SIGFPE = errore aritmetico. SIGSEGV = indirizzo non valido, SIGILL = istruzione illegale.`],
+['mc', R`L'accesso a un indirizzo non valido produce…`, [R`SIGSEGV`, R`SIGFPE`, R`SIGILL`, R`SIGBUS`], R`Segmentation violation.`],
+['mc', R`Il registro PSW contiene…`, [R`codici di condizione e modalità user/kernel`, R`l'indirizzo della prossima istruzione`, R`la cima dello stack`, R`il numero della system call`], R`La prossima istruzione è nel PC, la cima dello stack nello SP.`],
+['mc', R`Accesso ai registri del controller con istruzioni IN/OUT:`, [R`port-mapped`, R`memory-mapped`, R`DMA`, R`busy waiting`], R`Memory-mapped = registri mappati su indirizzi di memoria, si usano istruzioni normali.`],
+['mc', R`Prima fase dell'avvio del computer:`, [R`BIOS/UEFI inizializza le risorse`, R`L'MBR carica il kernel`, R`Parte init/systemd`, R`Il login`], R`Poi il BIOS esegue il primo settore (MBR), che trova la partizione attiva e carica il bootloader.`],
+['tf', R`Una system call può bloccare il chiamante (es. in attesa del disco).`, true, R`Avviene un context switch e il ritorno arriva più tardi.`],
+['tf', R`Le eccezioni sono eventi asincroni.`, false, R`Sono sincrone: le causa l'istruzione in esecuzione.`],
+['tf', R`La parola "trap" ha un unico significato in tutti i testi.`, false, R`Ha più significati; nel libro del corso è l'istruzione per entrare in kernel mode.`],
+['tf', R`System call ed eccezioni sono a volte chiamate interrupt "software".`, true, R`Si contrappongono agli interrupt hardware.`],
+['fill', R`System call ed eccezioni sono [[sincrone]], l'interrupt hardware è [[asincrono]].`, [R`atomico`, R`privilegiato`], R`Sincrono = causato dall'istruzione in esecuzione.`],
+['fill', R`La CPU usa l'[[interrupt vector]] come indice nella [[tabella dei vettori]] per trovare la [[ISR]].`, [R`PCB`, R`TLB`, R`MBR`], R`In Linux la tabella è la IDT.`],
+['ord', R`Interrupt request: metti in ordine.`, [R`Il driver avvia una richiesta di I/O sul controller`, R`Il controller segnala l'interrupt all'interrupt controller`, R`L'interrupt controller attiva un pin della CPU`, R`L'interrupt controller mette sul bus il numero del dispositivo`], R`Il numero sul bus è l'interrupt vector.`],
+['ord', R`Interrupt handling: metti in ordine i passi principali.`, [R`La CPU salva PC (e SP, PSW) sul kernel stack`, R`Carica nel PC l'indirizzo della ISR`, R`Salvataggio dei registri (assembly)`, R`Esecuzione della ISR (in C)`, R`Lo scheduler sceglie il prossimo processo`, R`Ripristino dello stato del processo scelto`, R`Ritorno al processo con iret`], R`Context switch al ripristino, solo se il processo scelto è diverso.`],
+['ord', R`System call: metti in ordine.`, [R`La libreria mette il numero in rax e i parametri nei registri`, R`Istruzione syscall (trap) → kernel mode`, R`Il kernel usa rax nella tabella di puntatori (dispatch)`, R`Esecuzione dell'handler`, R`Ritorno alla libreria e al chiamante`], R`Passi 1–5 user space, 6 trap, 7 dispatch, 8 handler, 9–10 ritorno.`],
+['code', R`Registra un handler per la divisione per zero.`, R`void myhandler(int signum){
+    printf("Divide by zero\n");
+    exit(1);
+}
+int main(){
+    [[signal]]([[SIGFPE]], myhandler);
+    int a = 10, b = 0;
+    int c = a / b;
+}`, [R`SIGSEGV`, R`kill`, R`wait`], R`signal(SIGFPE, myhandler): l'eccezione diventa SIGFPE e viene eseguito myhandler.`],
+]});
+
+MODULES.push({ id: 'proc', title: 'Processi e thread', sub: 'PCB, stati, thread kernel/user', items: [
+['fc', R`Cos'è un processo?`, R`Un **programma in esecuzione**. Ha uno **spazio degli indirizzi** e delle **risorse** (file aperti), ed è descritto dal kernel nel **PCB**.`],
+['fc', R`Cosa contiene il PCB?`, R`Tutto **tranne il contenuto dello spazio degli indirizzi**: PID, contesto CPU (PC, SP, PSW, registri), file aperti, stato, info di scheduling. L'insieme dei PCB = **tabella dei processi**.`],
+['fc', R`I 3 stati e le transizioni`, R`**running → blocked** (aspetta evento), **blocked → ready** (evento arrivato), **ready → running** (scheduler), **running → ready** (scade il quanto). **Non esiste blocked → running.**`],
+['fc', R`Cos'è un thread?`, R`Un **flusso di controllo sequenziale dentro un processo**. Separa il **possesso delle risorse** (processo) dall'**esecuzione** (thread). Detto lightweight process.`],
+['fc', R`Thread: vantaggi e svantaggio`, R`Creazione e context switch più veloci, comunicazione semplice (memoria condivisa), uno lavora mentre l'altro aspetta l'I/O. **Svantaggio: nessuna protezione** tra thread.`],
+['fc', R`Thread kernel-level vs user-level`, R`**Kernel-level**: il kernel li conosce e schedula (Linux: clone); un blocco non ferma gli altri; più lenti. **User-level**: gestiti da una libreria; context switch velocissimo; ma una system call bloccante **blocca tutti**.`],
+['fc', R`I 4 modi in cui termina un processo`, R`1. uscita normale (exit) 2. uscita su errore 3. errore fatale (es. divisione per zero) 4. ucciso da un altro processo (kill).`],
+['mc', R`Il PCB contiene tutte le informazioni del processo tranne…`, [R`il contenuto dello spazio degli indirizzi`, R`il PID`, R`i file aperti`, R`lo stato`], R`Il contenuto della memoria non sta nel PCB.`],
+['mc', R`Quale transizione NON esiste?`, [R`blocked → running`, R`running → blocked`, R`blocked → ready`, R`ready → running`], R`Dopo l'evento si passa sempre da ready.`],
+['mc', R`running → ready avviene quando…`, [R`scade il quanto (timer interrupt)`, R`il processo aspetta l'I/O`, R`l'I/O è terminato`, R`il processo chiama exit`], R`Oppure quando il processo rilascia volontariamente la CPU.`],
+['mc', R`Cosa è PRIVATO di ogni thread?`, [R`lo stack`, R`le variabili globali`, R`i file aperti`, R`lo spazio degli indirizzi`], R`Privati: PC, registri, stack, stato. Condivisi: spazio indirizzi, globali, file aperti, figli, segnali.`],
+['mc', R`Cosa è CONDIVISO tra i thread di un processo?`, [R`le variabili globali`, R`lo stack`, R`il PC`, R`i registri`], R`Lo spazio degli indirizzi è uno solo per tutti i thread.`],
+['mc', R`Un thread user-level fa una system call bloccante. Cosa succede?`, [R`Si bloccano tutti i thread del processo`, R`Il kernel fa girare un altro thread`, R`Si blocca solo quel thread`, R`Il processo termina`], R`Il kernel vede un processo con un solo thread e lo blocca tutto.`],
+['mc', R`Una variabile static dentro una funzione sta…`, [R`nei dati statici`, R`nello stack`, R`nello heap`, R`in un registro`], R`static = dati statici anche se definita in un blocco; visibilità solo nel blocco.`],
+['mc', R`Una variabile allocata con malloc sta…`, [R`nello heap`, R`nello stack`, R`nel text`, R`nei dati statici`], R`Lo heap cresce verso l'alto; lo stack verso il basso.`],
+['mc', R`Una variabile automatica (locale) sta…`, [R`nello stack`, R`nello heap`, R`nei dati statici`, R`nel PCB`], R`Le variabili locali e le chiamate a funzione vanno nello stack.`],
+['mc', R`pthread_join serve a…`, [R`aspettare che un thread specifico termini`, R`creare un thread`, R`cedere la CPU`, R`terminare il thread chiamante`], R`È l'analogo della wait per i thread.`],
+['mc', R`In Linux un processo con 3 thread ha…`, [R`3 task_struct`, R`1 task_struct`, R`4 task_struct`, R`nessuna task_struct`], R`Per Linux un thread è un "normale" processo che condivide risorse.`],
+['mc', R`In UNIX, l'unico processo NON creato con fork è…`, [R`init/systemd`, R`la shell`, R`il kernel`, R`il primo processo utente`], R`init/systemd viene creato all'avvio del SO.`],
+['mc', R`Il codice del programma sta nell'area…`, [R`text`, R`dati`, R`heap`, R`stack`], R`Dal basso: text, dati, heap, gap, stack.`],
+['mc', R`Il context switch può avvenire quando il kernel prende il controllo per…`, [R`interrupt, system call o eccezione`, R`solo interrupt del timer`, R`solo system call`, R`solo fork`], R`Ogni volta che il kernel prende il controllo.`],
+['tf', R`Pthreads è una specifica, non un'implementazione.`, true, R`Può essere implementata a livello utente o kernel.`],
+['tf', R`Lo stack cresce verso gli indirizzi alti.`, false, R`Lo stack cresce verso il basso, lo heap verso l'alto.`],
+['tf', R`Con più thread, lo spazio degli indirizzi ha uno stack per ogni thread.`, true, R`Ognuno con il suo PC e SP.`],
+['tf', R`clone permette di scegliere quali risorse condividere.`, true, R`Dal 2000; crea un thread nel processo corrente o in uno nuovo.`],
+['tf', R`I thread user-level sfruttano bene più core.`, false, R`Il kernel vede un solo thread: un solo core.`],
+['fill', R`Un thread è un [[flusso di controllo]] sequenziale all'interno di un [[processo]].`, [R`kernel`, R`programma`, R`PCB`], R`Il processo possiede le risorse, i thread eseguono.`],
+['ord', R`Spazio degli indirizzi: dall'alto (indirizzi alti) al basso.`, [R`Stack`, R`Gap`, R`Heap`, R`Dati`, R`Text`], R`Stack ↓ e heap ↑ crescono uno verso l'altro.`],
+['code', R`Crea 10 thread con Pthreads.`, R`#include <pthread.h>
+void *print_hello(void *tid) {
+    printf("Hello from thread %d\n", tid);
+    [[pthread_exit]](NULL);
+}
+int main() {
+    pthread_t threads[10];
+    for (int i = 0; i < 10; i++)
+        [[pthread_create]](&threads[i], NULL, print_hello, (void *) i);
+}`, [R`pthread_join`, R`fork`, R`clone`], R`pthread_create(&id, attributi, funzione, argomento).`],
+]});
+
+MODULES.push({ id: 'fork', title: 'fork, wait, exec', sub: 'Esce sempre: fork, zombie, exec', practice: true, items: [
+['fc', R`Cosa restituisce fork()?`, R`**< 0** errore · **0** nel **figlio** · **> 0** nel **padre** (è il PID del figlio). Entrambi ripartono dall'istruzione dopo la fork.`],
+['fc', R`Zombie vs orfano`, R`**Zombie**: il figlio termina prima che il padre faccia wait; resta PID e PCB (stato Z, <defunct>). Si risolve con la **wait del padre**. **Orfano**: il padre termina prima; i figli vengono adottati da **init**, getppid() = **1**.`],
+['fc', R`exec: cosa fa e cosa mantiene`, R`**Sostituisce il programma**: codice, dati, stack, heap nuovi. **Non crea un processo, il PID non cambia.** Mantiene la u-area (file aperti, directory corrente). **Se riesce non ritorna.**`],
+['fc', R`Le lettere delle exec`, R`**l** = lista di argomenti finita da NULL · **v** = vettore · **p** = cerca nel PATH · **e** = passa l'ambiente. Tutte usano la system call **execve**.`],
+['fc', R`Come fa la shell a eseguire un comando?`, R`**fork** → il figlio fa **exec** del comando → il padre fa **wait**. Così la shell sopravvive alla exec.`],
+['fc', R`Fork nella condizione dell'if`, R`La fork nella condizione la eseguono **tutti** quelli che arrivano a quella riga; nel corpo entra solo il **figlio nuovo** (riceve 0). Metodo: per ogni fork chiediti quanti processi arrivano lì.`],
+['fc', R`Copy-on-write`, R`L'area text è condivisa; il resto è condiviso in **sola lettura** e il kernel ne copia una parte **solo quando uno dei due la modifica**.`],
+['mc', R`fork() restituisce al FIGLIO…`, [R`0`, R`il PID del figlio`, R`-1`, R`il PID del padre`], R`Nel figlio vale 0; il suo PID vero si ottiene con getpid().`],
+['mc', R`fork() restituisce al PADRE…`, [R`il PID del figlio`, R`0`, R`il PID del padre`, R`1`], R`> 0 nel padre.`],
+['mc', R`Nel tuo codice scrivi if (pid == 1) per il ramo del figlio. Cosa succede?`, [R`Nessun figlio entra nel ramo: il figlio riceve 0`, R`Funziona uguale`, R`Entra solo il padre`, R`Errore di compilazione`], R`Errore che hai fatto 2 volte! Con il for, i figli poi continuano anche a fare fork.`],
+['mc', R`Il figlio termina, il padre non ha ancora fatto wait. Il figlio è…`, [R`zombie`, R`orfano`, R`blocked`, R`adottato da init`], R`Conserva PID e PCB finché il padre non raccoglie il valore di uscita.`],
+['mc', R`Il padre termina prima dei figli. Poi nel figlio getppid() restituisce…`, [R`1`, R`0`, R`-1`, R`il vecchio PID del padre`], R`I figli orfani vengono adottati da init (systemd).`],
+['mc', R`Se la exec riesce…`, [R`non ritorna mai`, R`ritorna 0`, R`crea un processo nuovo`, R`cambia il PID`], R`Ritorna solo in caso di errore: per questo dopo si scrivono perror ed exit(1).`],
+['mc', R`Perché si fa fflush(stdout) prima della exec?`, [R`Per svuotare il buffer delle printf, che andrebbe perso`, R`Per chiudere i file aperti`, R`Per evitare uno zombie`, R`Perché exec non stampa`], R`La vecchia memoria (con il buffer) viene sostituita.`],
+['mc', R`Nella execlp, la p significa…`, [R`cerca il programma nel PATH`, R`passa i parametri`, R`usa un puntatore`, R`processo nuovo`], R`Con la p basta il nome; senza serve il percorso completo, es. execl("/bin/ls", ...).`],
+['mc', R`Usi execvp(argv[1], &argv[1]) quando…`, [R`non sai quanti argomenti arrivano`, R`vuoi passare l'ambiente`, R`il programma non è nel PATH`, R`vuoi creare un thread`], R`&argv[1] è il vettore che parte dalla casella 1 ed è già chiuso da NULL.`],
+['mc', R`WEXITSTATUS(stato) restituisce…`, [R`il valore passato dal figlio a exit`, R`il PID del figlio`, R`il PID del padre`, R`1 se il figlio è zombie`], R`stato viene riempito da wait(&stato) o waitpid(pid, &stato, 0).`],
+['mc', R`./lista lss (exec di un programma che non esiste). Che stato vede il padre?`, [R`Il tuo exit(1) dopo perror`, R`0`, R`2, l'errore di ls`, R`-1`], R`La exec fallisce, ritorna, si esegue perror e poi exit(1).`],
+['mc', R`./lista pippo (cartella che non esiste) fa exec di ls. Che stato vede il padre?`, [R`2, l'exit di ls`, R`1, il tuo exit(1)`, R`0`, R`-1`], R`Se la exec riesce, lo stato è l'exit del programma eseguito.`],
+['mc', R`wait(&stato) vs waitpid(pid, &stato, 0)`, [R`wait aspetta un figlio qualsiasi, waitpid quel figlio`, R`sono identiche`, R`wait non blocca il padre`, R`waitpid aspetta tutti i figli`], R`Entrambe restituiscono il PID del figlio raccolto.`],
+['mc', R`Il padre crea 3 figli in un for e li aspetta in un secondo for. I figli…`, [R`girano in contemporanea, output mescolato`, R`girano uno alla volta in ordine`, R`diventano orfani`, R`non partono finché il padre non fa wait`], R`Con la wait subito dopo ogni fork (un solo for) girerebbero uno alla volta.`],
+['mc', R`Perché nel figlio, dentro il for, serve exit(i)?`, [R`Senza, il figlio continuerebbe il for e farebbe altre fork`, R`Per diventare zombie`, R`Per liberare la memoria del padre`, R`Non serve`], R`Il figlio esegue tutto il codice dopo la fork, for compreso.`],
+['tf', R`Senza wait, l'ordine di esecuzione di padre e figlio è prevedibile.`, false, R`Lo decide lo scheduler.`],
+['tf', R`I file aperti prima della fork sono condivisi da padre e figlio.`, true, R`Le variabili invece sono copiate.`],
+['tf', R`Dopo la fork, se il figlio modifica una variabile, il padre vede la modifica.`, false, R`Le modifiche successive sono private: ognuno ha la sua copia.`],
+['tf', R`Esiste una system call chiamata semplicemente exec.`, false, R`Ci sono varianti di libreria (execl, execlp, execv, execvp…) che usano execve.`],
+['num', R`Quante X stampa?
+fork();
+fork();
+fork();
+printf("X");`, 8, R`n fork di fila → 2ⁿ processi: 2³ = 8.`],
+['num', R`Quante X stampa?
+p = fork();
+if (p == 0) fork();
+printf("X");`, 3, R`Padre, figlio, nipote: 3 X.`],
+['num', R`Quante X stampa?
+fork();
+if (fork() == 0)
+    fork();
+printf("X\n");`, 6, R`2 processi arrivano all'if, ognuno crea un figlio che entra e fa un'altra fork: P, C1, C2, C3, C4, C5.`],
+['num', R`Quante X stampa?
+for (int i = 0; i < 2; i++)
+    fork();
+printf("X");`, 4, R`Due fork di fila: 2² = 4.`],
+['num', R`Quante X stampa?
+if (fork() == 0)
+    printf("X");
+printf("X");`, 3, R`Il figlio stampa 2 X (nel corpo e dopo), il padre 1.`],
+['code', R`Esame 1: il figlio esegue echo ciao mondo, il padre stampa lo stato.`, R`pid_t pid = [[fork()]];
+if (pid [[<]] 0) { perror("fork"); exit(1); }
+else if (pid == [[0]]) {
+    [[execlp]]("echo", "echo", "ciao", "mondo", [[NULL]]);
+    perror("exec fallita");
+    exit(1);
+}
+int stato;
+[[waitpid]](pid, &stato, 0);
+printf("stato %d\n", [[WEXITSTATUS]](stato));`, [R`1`, R`execv`, R`getpid()`, R`>`, R`WIFEXITED`], R`execlp: nome una volta, poi ogni parola è un argomento, poi NULL.`],
+['code', R`Esame 2: 3 figli, il padre li aspetta tutti.`, R`for (int i = 0; i < 3; i++) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        printf("Figlio %d PID=%d PADRE=%d\n", i, [[getpid()]], [[getppid()]]);
+        [[exit(i)]];
+    }
+}
+for (int i = 0; i < 3; i++) {
+    int stato;
+    pid_t p = [[wait(&stato)]];
+    printf("figlio %d stato %d\n", p, WEXITSTATUS(stato));
+}`, [R`fork()`, R`wait(NULL)`, R`return`], R`Il figlio deve uscire subito, altrimenti continua il for.`],
+['code', R`Completa la exec di ls -l sulla cartella passata come argomento.`, R`printf("Sono il figlio %d\n", getpid());
+[[fflush]](stdout);
+execlp([["ls"]], "ls", [["-l"]], [[argv[1]]], NULL);
+[[perror]]("exec fallita");
+exit(1);`, [R`" -l"`, R`argv[0]`, R`printf`, R`fclose`], R`" -l" con lo spazio → ls lo prende come nome di file (errore che hai fatto).`],
+['code', R`Mini-shell: esegue il comando passato da riga di comando.`, R`pid_t pid = fork();
+if (pid == 0) {
+    [[execvp]]([[argv[1]]], [[&argv[1]]]);
+    perror("exec fallita");
+    exit(1);
+}`, [R`execlp`, R`argv[0]`, R`&argv[0]`], R`./esegui ls -l resources → execvp("ls", {"ls","-l","resources",NULL}).`],
+['ord', R`fork + exec + wait: come fa la shell.`, [R`Il padre fa fork`, R`Il figlio fa exec del comando`, R`Il padre fa wait`, R`Il figlio termina, il padre continua`], R`Così il programma originale sopravvive alla exec.`],
+]});
+
+MODULES.push({ id: 'sched', title: 'Scheduling', sub: 'FCFS, SJF, SRTN, RR, priorità', items: [
+['fc', R`Preemptive vs non preemptive`, R`**Non preemptive**: il processo tiene la CPU finché termina o si blocca. **Preemptive**: il SO può togliergliela (es. scade il quanto); serve il **timer interrupt**. I SO moderni sono preemptive.`],
+['fc', R`Tempo di attesa e turnaround: formule`, R`**Attesa** = fine − arrivo − esecuzione. **Turnaround** = fine − arrivo.`],
+['fc', R`Round Robin`, R`Preemptive, ogni processo ha un **quanto**; se non finisce va in **fondo alla coda**. Quanto troppo breve → troppi context switch; troppo lungo → diventa **FCFS**. Tipico 20–50 ms.`],
+['fc', R`Starvation nello scheduling a priorità: soluzioni`, R`Abbassare la priorità di chi gira a ogni clock; **nice**; **priorità = 1/f** (f = frazione del quanto usata) che premia gli I/O-bound.`],
+['fc', R`Code multilivello con feedback`, R`Più code con priorità diverse; un processo nuovo entra nella più alta e **scende** se non finisce nel quanto. Brevi e I/O-bound restano in alto, lunghi e CPU-bound scendono.`],
+['fc', R`SPN e media esponenziale`, R`Stima il prossimo burst: **τₙ₊₁ = α·tₙ + (1−α)·τₙ**. α = 0 conta solo il passato, α = 1 solo l'ultimo burst, α = ½ è la media.`],
+['mc', R`Quale algoritmo soffre dell'effetto convoglio?`, [R`FCFS`, R`SJF`, R`Round Robin`, R`SRTN`], R`Un processo lungo fa aspettare tutti i corti.`],
+['mc', R`Quale algoritmo è preemptive?`, [R`SRTN`, R`SJF`, R`FCFS`, R`Nessuno di questi`], R`SRTN interrompe chi gira se arriva un processo con durata minore del suo tempo rimanente.`],
+['mc', R`Round Robin con quanto troppo lungo diventa…`, [R`FCFS`, R`SJF`, R`a priorità`, R`SRTN`], R`Nessuno viene più interrotto.`],
+['mc', R`Quale algoritmo NON può causare starvation?`, [R`Round Robin`, R`SRTN`, R`Priorità`, R`SPN`], R`Anche FCFS non ne causa. SRTN, SPN, priorità e feedback sì.`],
+['mc', R`SJF dà l'attesa media minima quando…`, [R`i processi arrivano tutti insieme`, R`i processi arrivano in momenti diversi`, R`il quanto è breve`, R`ci sono più CPU`], R`Deve conoscere le durate in anticipo.`],
+['mc', R`Gli obiettivi principali dei sistemi interattivi sono…`, [R`tempo di risposta e di attesa`, R`throughput e turnaround`, R`rispetto delle scadenze`, R`uso massimo della CPU`], R`Batch: throughput, turnaround, uso CPU. Real-time: scadenze e prevedibilità.`],
+['mc', R`Lo scheduling preemptive richiede…`, [R`il timer interrupt`, R`il DMA`, R`la TLB`, R`i semafori`], R`Il timer ridà il controllo al kernel.`],
+['mc', R`Con thread user-level, chi sceglie quale thread eseguire?`, [R`la libreria dei thread`, R`lo scheduler del kernel`, R`il thread stesso con il timer`, R`l'hardware`], R`Il kernel dà il quanto al processo, la libreria sceglie il thread.`],
+['mc', R`Il comando con cui l'utente abbassa la priorità di un processo è…`, [R`nice`, R`kill`, R`chmod`, R`ps`], R`nice riduce volontariamente la priorità.`],
+['mc', R`Lo scheduler interviene quando un processo è creato o arriva un interrupt: questi due casi servono…`, [R`allo scheduling preemptive`, R`solo al non preemptive`, R`solo al FCFS`, R`a nessuno`], R`Terminazione e blocco bastano al non preemptive.`],
+['tf', R`SJF è preemptive.`, false, R`La versione preemptive è SRTN.`],
+['tf', R`Linux, Windows e macOS sono preemptive.`, true, R`Tutti i SO moderni.`],
+['tf', R`Priorità = 1/f premia i processi I/O-bound.`, true, R`Usano poco del quanto, quindi f è piccolo e la priorità alta.`],
+['tf', R`Round Robin deve conoscere la durata dei processi.`, false, R`SJF, SRTN sì; RR e FCFS no.`],
+['tf', R`Il modello 1 − pⁿ è esatto.`, false, R`È approssimato: considera i processi indipendenti.`],
+['fill', R`Lo scheduler sceglie quale processo in stato [[ready]] mandare in [[running]].`, [R`blocked`, R`zombie`], R`Nel preemptive può anche togliere la CPU (running → ready).`],
+['fill', R`Media esponenziale: τₙ₊₁ = [[α]] · tₙ + (1 − α) · [[τₙ]]`, [R`tₙ₊₁`, R`n`], R`tₙ = durata vera dell'ultimo burst, τₙ = la stima che avevi fatto.`],
+['num', R`Utilizzo CPU = 1 − pⁿ. Con p = 0,5 e n = 2, l'utilizzo in percentuale è…`, 75, R`1 − 0,25 = 0,75 → 75%.`],
+['num', R`Utilizzo CPU con p = 0,5 e n = 3 (in %, anche con decimali)`, 87.5, R`1 − 1/8 = 0,875.`, 0.01],
+['num', R`FCFS: A = 5, B = 2, C = 8, tutti al tempo 0. Attesa media?`, 4, R`Attese 0, 5, 7 → 12/3 = 4.`],
+['num', R`SJF: A = 5, B = 2, C = 8, tutti al tempo 0. Attesa media?`, 3, R`Ordine B, A, C → attese 0, 2, 7 → 3.`],
+['num', R`SRTN: A (arrivo 0, durata 7), B (arrivo 1, durata 3), C (arrivo 2, durata 1). Attesa di A?`, 4, R`A finisce a 11: 11 − 0 − 7 = 4. Sequenza A|B|C|B|A.`],
+['num', R`SRTN, stesso esempio (A 0/7, B 1/3, C 2/1). Turnaround di B?`, 4, R`B finisce a 5: 5 − 1 = 4.`],
+['num', R`Round Robin, quanto 2: A = 5, B = 3, C = 1, tutti al tempo 0. A che istante finisce B?`, 8, R`A|B|C|A|B|A: 0-2-4-5-7-8-9. B finisce a 8.`],
+['num', R`Round Robin, quanto 2: A = 5, B = 3, C = 1. Attesa di B?`, 5, R`8 − 0 − 3 = 5.`],
+['num', R`SPN con α = ½: stima precedente 8, durata vera 12. Prossima stima?`, 10, R`(12 + 8) / 2 = 10.`],
+['num', R`Priorità = 1/f, quanto di 50 ms. Il processo ha usato 25 ms. Priorità?`, 2, R`f = 25/50 = 1/2 → priorità 2. Se ne usa 1 → 50.`],
+['num', R`Code Q0 (RR 8 ms), Q1 (RR 16 ms), Q2 (FCFS). Un processo usa 50 ms di fila: quanti ms fa in Q2?`, 26, R`8 in Q0, 16 in Q1, restano 26 in Q2.`],
+]});
+
+MODULES.push({ id: 'mem', title: 'Memoria', sub: 'Paginazione, TLB, page fault, sostituzione', items: [
+['fc', R`MMU`, R`**Dispositivo hardware** che traduce gli indirizzi logici in fisici **durante l'esecuzione** (rilocazione dinamica).`],
+['fc', R`Registri base e limite`, R`Se logico < limite → fisico = **base + logico**, altrimenti **eccezione**. Difetto: somma e confronto a ogni accesso, processo contiguo.`],
+['fc', R`Traduzione con paginazione`, R`pagina = logico / dim. pagina · offset = logico − pagina × dim · **fisico = frame × dim + offset**. L'**offset non cambia mai**.`],
+['fc', R`TLB: hit, soft miss, hard miss`, R`**Hit**: traduzione immediata. **Soft miss**: non nel TLB ma in RAM → page table walk, niente disco. **Hard miss**: non in RAM → **page fault**, si va su disco.`],
+['fc', R`Bit della PTE`, R`**Presente/assente**, **protezione** (rwx), **supervisor** (solo kernel), **M** dirty (riscrivere su disco), **R** referenced (usata di recente), **caching** (disattiva cache).`],
+['fc', R`Thrashing`, R`Page fault ogni poche istruzioni: troppi processi, nessun working set ci sta. **Aggiungere processi peggiora.** Soluzione: **ridurre i processi** in RAM.`],
+['fc', R`NRU: le 4 classi`, R`0: R=0 M=0 (vittima ideale) · 1: R=0 M=1 · 2: R=1 M=0 · 3: R=1 M=1. Toglie a caso dalla classe più bassa non vuota. La classe 1 esiste perché il clock azzera R ma non M.`],
+['fc', R`FIFO, seconda chance, clock`, R`**FIFO**: toglie la più vecchia. **Seconda chance**: se R=1 azzera R e la rimette in fondo. **Clock**: stessa logica con un cerchio e una lancetta che si sposta.`],
+['fc', R`Paginazione vs segmentazione`, R`Paginazione: dimensione **fissa**, divisione meccanica, pagina+offset. Segmentazione: dimensione **variabile**, parti logiche, (s, d) con base e limite.`],
+['mc', R`Base 500, limite 100. Indirizzo logico 150 →`, [R`errore: il processo ha solo 100 celle`, R`650`, R`150`, R`600`], R`150 ≥ limite → eccezione.`],
+['mc', R`Il registro PTBR punta a…`, [R`l'inizio della tabella delle pagine del processo`, R`la TLB`, R`il primo frame libero`, R`il PCB`], R`Negli x86 è CR3. Al context switch basta cambiarlo.`],
+['mc', R`Negli x86 il PTBR è il registro…`, [R`CR3`, R`rax`, R`CS`, R`PSW`], R`CR3 contiene l'indirizzo della tabella delle pagine.`],
+['mc', R`La pagina non è nel TLB ma è in RAM (presente = 1). È un…`, [R`soft miss`, R`hard miss`, R`TLB hit`, R`segmentation fault`], R`Si legge la tabella e si aggiorna il TLB, senza disco.`],
+['mc', R`Il bit M (dirty) = 1 significa che…`, [R`prima di togliere la pagina bisogna riscriverla su disco`, R`la pagina è stata usata di recente`, R`la pagina è del kernel`, R`la pagina non è in RAM`], R`Se è pulita, il frame si sovrascrive subito.`],
+['mc', R`Al context switch il TLB…`, [R`viene svuotato, salvo TLB con tag (PID)`, R`non cambia mai`, R`viene copiato nel PCB`, R`viene riscritto su disco`], R`Le traduzioni del processo precedente non valgono più.`],
+['mc', R`Il page fault è…`, [R`una trap causata dal processo stesso`, R`un interrupt hardware asincrono`, R`una system call`, R`sempre un errore fatale`], R`Diventa errore (segmentation fault) solo se l'indirizzo non è valido.`],
+['mc', R`L'algoritmo di sostituzione ottimo…`, [R`non è realizzabile: serve solo come paragone`, R`è usato da Linux`, R`è il FIFO`, R`guarda solo il bit M`], R`Dovrebbe conoscere il futuro.`],
+['mc', R`NRU: quale classe viene scelta per prima?`, [R`Classe 0 (R=0, M=0)`, R`Classe 1 (R=0, M=1)`, R`Classe 2 (R=1, M=0)`, R`Classe 3 (R=1, M=1)`], R`Classe più bassa non vuota.`],
+['mc', R`Clock: A(R=1), B(R=1), C(R=0), D(R=1), lancetta su A, arriva E. Chi esce?`, [R`C`, R`A`, R`B`, R`D`], R`A e B: R → 0, avanti. C ha R = 0: vittima.`],
+['mc', R`Aging: X ha contatore 0011, Y ha 0100. Chi esce?`, [R`X`, R`Y`, R`nessuno`, R`entrambi`], R`Esce il contatore più basso. Con NFU invece uscirebbe Y.`],
+['mc', R`Working set, tempo 2000, τ = 500. A: R=0, ultimo uso 1700. B: R=1. C: R=0, ultimo uso 1300. Vittima?`, [R`C`, R`A`, R`B`, R`nessuna`], R`C ha età 700 > 500. A ha età 300 ≤ 500, B ha R = 1.`],
+['mc', R`FIFO guarda l'ingresso in RAM, LRU…`, [R`l'ultimo uso`, R`il numero di usi`, R`il bit M`, R`l'ingresso in RAM`], R`NFU guarda il numero di usi.`],
+['mc', R`Perché LRU non si usa in pratica?`, [R`Va aggiornato a ogni accesso in memoria: troppo costoso`, R`È peggiore del FIFO`, R`Non usa il bit R`, R`Funziona solo con la segmentazione`], R`Servirebbe hardware apposito.`],
+['mc', R`Indirizzi a 32 bit con tabella a due livelli: come si divide l'indirizzo?`, [R`PT1 10 bit, PT2 10 bit, offset 12 bit`, R`PT1 16 bit, offset 16 bit`, R`PT1 12, PT2 12, offset 8`, R`20 bit di pagina e 12 di frame`], R`Su x86-64 i livelli sono 4.`],
+['mc', R`Demand paging vs pre-paging: il pre-paging…`, [R`carica il working set prima di far partire il processo`, R`carica una pagina alla volta dopo i page fault`, R`non usa il disco`, R`causa più page fault all'avvio`], R`Il demand paging ha tanti page fault all'avvio.`],
+['mc', R`Libreria condivisa su Linux:`, [R`.so, caricata in RAM una volta sola e condivisa`, R`.a, copiata dentro l'eseguibile`, R`.dll, solo statica`, R`.o, mai condivisa`], R`Usa indirizzi relativi: codice indipendente dalla posizione.`],
+['mc', R`Major page fault:`, [R`la pagina va letta dal disco`, R`la pagina è già in RAM per un altro processo`, R`l'indirizzo non è valido`, R`la pagina è nel TLB`], R`Minor: già in RAM, basta collegarla.`],
+['mc', R`A 32 bit, in Linux, l'ultimo GB dello spazio degli indirizzi è…`, [R`del kernel`, R`dello stack utente`, R`dello heap`, R`libero`], R`I primi ~896 MB sono mappati in modo lineare (fisico = lineare − 0xC0000000).`],
+['tf', R`L'offset cambia durante la traduzione.`, false, R`Cambia solo pagina → frame.`],
+['tf', R`Una vittima pulita (M = 0) va riscritta su disco prima di essere tolta.`, false, R`La copia su disco è identica: si sovrascrive subito il frame.`],
+['tf', R`In caso di thrashing conviene aggiungere processi.`, false, R`Peggiora: bisogna ridurli.`],
+['tf', R`L'istruzione che causa il page fault viene rieseguita.`, true, R`Non viene saltata.`],
+['tf', R`Ogni processo ha la sua tabella delle pagine.`, true, R`E il PTBR punta a quella del processo corrente.`],
+['fill', R`Indirizzo fisico = [[frame]] × dimensione pagina + [[offset]].`, [R`pagina`, R`base`, R`limite`], R`Il frame si legge nella tabella delle pagine alla riga della pagina.`],
+['fill', R`Lo spazio è diviso in [[pagine]], la RAM in [[frame]] della stessa dimensione (tipicamente [[4 KB]]).`, [R`segmenti`, R`blocchi`, R`1 MB`], R`In RAM solo le pagine che servono adesso.`],
+['num', R`Base 500, limite 100. Indirizzo logico 30 → fisico?`, 530, R`30 < 100 → 500 + 30.`],
+['num', R`Rilocazione statica: programma caricato a 16384. JMP 28 diventa JMP…`, 16412, R`16384 + 28.`],
+['num', R`Indirizzi a 16 bit, pagine da 4 KB. Quante pagine?`, 16, R`2¹⁶ / 2¹² = 2⁴.`],
+['num', R`RAM da 32 KB, pagine da 4 KB. Quanti frame?`, 8, R`2¹⁵ / 2¹² = 2³.`],
+['num', R`Pagine da 1 KB (1024), pagina 1 → frame 4. Logico 1952 → fisico?`, 5024, R`Pagina 1, offset 928 → 4 × 1024 + 928.`],
+['num', R`Indirizzi a 48 bit, pagine da 4 KB: 2 elevato a quanto pagine?`, 36, R`48 − 12 = 36.`],
+['num', R`Segmentazione: base del segmento 2 = 4300. (2, 53) → fisico?`, 4353, R`53 < limite → 4300 + 53.`],
+['ord', R`Gestione del page fault: metti in ordine.`, [R`Trap al kernel, si salvano PC e registri`, R`Il SO capisce quale pagina serve e se l'indirizzo è valido`, R`Cerca un frame libero o una vittima`, R`Se la vittima è sporca la riscrive su disco`, R`Carica la pagina dal disco nel frame`, R`Aggiorna la tabella delle pagine`, R`Ripristina l'istruzione e il processo riparte`], R`Durante le scritture/letture su disco il processo è sospeso.`],
+]});
+
+MODULES.push({ id: 'shell', title: 'Shell e comandi', sub: 'Permessi, PATH, redirezione, pipe', items: [
+['fc', R`Cosa succede quando scrivi un comando? E con &?`, R`La shell fa **fork**, il figlio fa **exec**, la shell fa **wait**. Con **&** niente wait: il prompt torna subito (background).`],
+['fc', R`Permessi r, w, x su una cartella`, R`**r**: vedere il contenuto (ls) · **w**: creare/cancellare file dentro · **x**: entrarci (cd).`],
+['fc', R`chmod con i numeri`, R`r = 4, w = 2, x = 1, sommati per tu/gruppo/altri. **755** = rwxr-xr-x · **644** = rw-r--r-- · **740** = rwxr-----.`],
+['fc', R`PATH`, R`Elenco di cartelle separate da **:** dove la shell cerca i programmi. La cartella corrente non c'è: per questo si scrive **./es1**. execlp/execvp (con p) cercano nel PATH.`],
+['fc', R`Redirezione`, R`**>** sovrascrive · **>>** aggiunge · **<** input da file · **2>** errori su file. Canali: 0 stdin, 1 stdout, 2 stderr.`],
+['fc', R`su vs sudo`, R`**su utente**: diventi un altro utente (chiede la **sua** password). **sudo comando**: esegui solo quel comando come root (chiede la **tua** password).`],
+['mc', R`chmod 740 file →`, [R`rwxr-----`, R`rwxr--r--`, R`rwxrw----`, R`rw-r-----`], R`7 = rwx, 4 = r--, 0 = ---.`],
+['mc', R`rwxr-xr-x in ottale è…`, [R`755`, R`644`, R`775`, R`711`], R`7 = rwx, 5 = r-x.`],
+['mc', R`rw-r--r-- in ottale è…`, [R`644`, R`755`, R`664`, R`600`], R`6 = rw-, 4 = r--.`],
+['mc', R`Il file è -rw-r--r--. Dopo chmod u+x diventa…`, [R`-rwxr--r--`, R`-rwxr-xr-x`, R`-rw-r--r-x`, R`-rwxrwxrwx`], R`u = tu: aggiunge x solo al proprietario.`],
+['mc', R`Hai appena creato script.sh e ./script.sh dà "Permission denied". Cosa manca?`, [R`chmod +x script.sh`, R`sudo`, R`#!/bin/bash alla fine`, R`mv script.sh`], R`Uno script appena creato non è eseguibile.`],
+['mc', R`comando 2> file salva…`, [R`gli errori (stderr)`, R`l'output (stdout)`, R`l'input`, R`due copie dell'output`], R`2 = stderr.`],
+['mc', R`sleep 10 & stampa [1] 513. Cosa è 513?`, [R`il PID del figlio`, R`il numero del job`, R`i secondi rimasti`, R`il PID della shell`], R`[1] è il numero del job.`],
+['mc', R`echo USER stampa…`, [R`la parola USER`, R`il tuo nome utente`, R`un errore`, R`niente`], R`Serve $USER per leggere la variabile.`],
+['mc', R`nome = corso (con gli spazi) →`, [R`errore: niente spazi attorno a =`, R`crea la variabile nome`, R`stampa corso`, R`confronta nome e corso`], R`Si scrive nome=corso.`],
+['mc', R`mv prova/a.txt prova/b.txt…`, [R`rinomina il file`, R`copia il file`, R`crea un link`, R`cancella a.txt e crea b.txt vuoto`], R`mv sposta o rinomina.`],
+['mc', R`rmdir cancella…`, [R`solo una cartella vuota`, R`qualsiasi cartella`, R`un file`, R`la cartella corrente`], R`Per una cartella piena: rm -r.`],
+['mc', R`ps -efL mostra anche…`, [R`i thread`, R`i file aperti`, R`le variabili d'ambiente`, R`gli utenti`], R`ps -ef: tutti i processi, formato completo.`],
+['mc', R`Nella colonna PPID di ps -ef c'è…`, [R`il PID del padre`, R`la priorità`, R`il numero di pagine`, R`il PID del primo figlio`], R`Per sleep lanciato da bash, il PPID è la bash.`],
+['mc', R`I file speciali che rappresentano i dispositivi stanno in…`, [R`/dev`, R`/bin`, R`/home`, R`/proc/sys`], R`File ordinari, directory, file speciali.`],
+['mc', R`Linux è distribuito con licenza…`, [R`GNU GPL`, R`public domain`, R`proprietaria`, R`MIT`], R`Protetto da diritti d'autore, ma modificabile e ridistribuibile.`],
+['mc', R`Circa il 70% del codice del kernel Linux sono…`, [R`driver`, R`scheduler`, R`file system`, R`commenti`], R`Linus Torvalds, 1991, clone di Unix.`],
+['mc', R`Rete della VM in cui l'host fa da router su una LAN virtuale:`, [R`NAT`, R`bridge`, R`SSH`, R`loopback`], R`Bridge = host e VM collegati direttamente alla rete fisica.`],
+['tf', R`In $PATH le cartelle sono separate da due punti (:).`, true, R`/usr/local/bin:/usr/bin:/bin:…`],
+['tf', R`Il $ del prompt indica una variabile.`, false, R`Significa solo "scrivi un comando" (# se sei root).`],
+['tf', R`Da man si esce con q.`, true, R`--help dà un riassunto veloce.`],
+['fill', R`Un [[>]] sovrascrive, due [[>>]] aggiungono, [[|]] passa l'output al comando successivo.`, [R`<`, R`&`, R`2>`], R`Pipe: comando1 | comando2.`],
+['code', R`Tieni solo le righe che contengono "buon".`, R`echo ciao > saluti.txt
+echo buongiorno [[>>]] saluti.txt
+cat saluti.txt [[|]] [[grep]] "buon"`, [R`>`, R`&`, R`awk`], R`Output: buongiorno.`],
+['code', R`Rendi eseguibile lo script e lancialo.`, R`chmod [[+x]] script.sh
+[[./]]script.sh`, [R`-x`, R`755x`, R`cd `], R`Senza ./ la shell lo cerca nel PATH e non lo trova.`],
+]});
+
+MODULES.push({ id: 'script', title: 'Shell scripting', sub: 'find, pipe, awk, for/if: esce allo scritto', practice: true, items: [
+['fc', R`find con -exec`, R`find DOVE -name "*.txt" -type f **-exec** cp **{}** dest **\;** — {} è il file trovato, \; chiude il comando. **Non è la exec del C.**`],
+['fc', R`Apici in bash`, R`**Doppi** "...": le variabili vengono sostituite. **Singoli** '...': tutto letterale (si usano in awk). **$( )** o backtick: esegue il comando.`],
+['fc', R`Test nelle if`, R`-eq = · -ne ≠ · -lt < · -le ≤ · -gt > · -ge ≥ · **-d** cartella esiste · **! -d** non esiste · **-f** file esiste. **Spazi obbligatori** dentro [ ].`],
+['fc', R`Regola d'oro delle pipe`, R`Il file si scrive **solo nel primo comando**: gli altri leggono dal tubo. Costruisci la pipe un pezzo alla volta, guardando che colonne hai.`],
+['fc', R`vim essenziale`, R`**i** scrivi · **Esc** modalità normale · **:wq** salva ed esci · **:q!** esci senza salvare · **dd** cancella riga · **u** annulla. Per incollare: **:set paste**.`],
+['mc', R`La prima riga di uno script bash è…`, [R`#!/bin/bash`, R`# bash`, R`!#/bin/bash`, R`bash.sh`], R`Lo shebang dice quale interprete usare.`],
+['mc', R`Con val=10, echo 'val = $val' stampa…`, [R`val = $val`, R`val = 10`, R`un errore`, R`10`], R`Gli apici singoli rendono tutto letterale.`],
+['mc', R`Perché prima di uniq si fa sort?`, [R`uniq toglie solo i doppioni uno sotto l'altro`, R`uniq funziona solo su numeri`, R`sort conta le righe`, R`non serve`], R`Pipe tipica: sort | uniq -c | sort -n.`],
+['mc', R`sort senza -n su 9 e 10 mette…`, [R`10 prima di 9`, R`9 prima di 10`, R`solo 10`, R`un errore`], R`Ordina come testo. Per i numeri serve -n.`],
+['mc', R`[ ! -d $dir ] è vero quando…`, [R`la cartella NON esiste`, R`la cartella esiste`, R`il file esiste`, R`la cartella è vuota`], R`! nega il test.`],
+['mc', R`wc -c < file restituisce…`, [R`solo il numero di byte`, R`numero di byte e nome del file`, R`il numero di righe`, R`il numero di caratteri della prima riga`], R`Con < non stampa il nome: comodo per gli if.`],
+['mc', R`In ./backup.sh resources mydir, $2 vale…`, [R`mydir`, R`resources`, R`./backup.sh`, R`2`], R`$1 = primo argomento, come argv[1].`],
+['mc', R`grep -v "World" file dà…`, [R`le righe SENZA World`, R`le righe con World`, R`il numero di righe con World`, R`la versione di grep`], R`-v inverte.`],
+['mc', R`awk '{print $2}' senza file e senza pipe…`, [R`resta in attesa della tastiera (Ctrl+C)`, R`stampa la seconda riga`, R`dà errore subito`, R`stampa $2`], R`Legge dallo standard input.`],
+['mc', R`Dopo awk '{print $6, $2}', nella pipe successiva la colonna RSS è…`, [R`$1`, R`$6`, R`$2`, R`$0`], R`Dopo un awk le colonne si rinumerano.`],
+['mc', R`Perché in ps aux | awk '{print $6, $2}' | sort -nr la RSS va per prima?`, [R`sort guarda la prima colonna`, R`awk stampa solo la prima`, R`sort -nr ordina per PID`, R`è indifferente`], R`Così si ordina per memoria occupata.`],
+['mc', R`In backup.sh perché rm -rf $BACKUPDIR prima di mkdir?`, [R`Al secondo lancio mkdir darebbe errore: la cartella esiste già`, R`Per liberare RAM`, R`Per cambiare i permessi`, R`Per creare le sottocartelle`], R`Alternativa: crearla solo se [ ! -d $dir ].`],
+['mc', R`Un if in bash si chiude con…`, [R`fi`, R`end`, R`done`, R`}`], R`for/while si chiudono con done.`],
+['mc', R`find resources -type d trova…`, [R`solo le cartelle`, R`solo i file`, R`i file .d`, R`i link`], R`-type f = solo file.`],
+['mc', R`In un for, cp {} $dest…`, [R`è sbagliato: le graffe valgono solo in find -exec`, R`copia il file corrente`, R`copia tutti i file`, R`crea una cartella`], R`Nel for si usa la variabile: cp $file $dest.`],
+['tf', R`[$x -gt $b] senza spazi funziona.`, false, R`Spazi obbligatori: [ $x -gt $b ].`],
+['tf', R`L'opzione -exec di find è la stessa exec del C.`, false, R`È un'opzione di find.`],
+['tf', R`for file in $dir/*.txt guarda anche nelle sottocartelle.`, false, R`Solo la cartella indicata; find invece è ricorsivo.`],
+['code', R`Parola più frequente in words.txt.`, R`sort resources/words.txt | [[uniq -c]] | [[sort -n]] | [[tail -n 1]] | awk '{print $2}'`, [R`head -n 1`, R`sort -r`, R`uniq`, R`wc -l`], R`Risultato: World (6 volte). Per la meno frequente: head -n 1.`],
+['code', R`I 5 PID che occupano più RAM.`, R`ps aux | awk '{print [[$6]], [[$2]]}' | [[sort -nr]] | head -n 5 | awk '{print $2}'`, [R`$1`, R`$5`, R`sort -n`], R`Colonne di ps aux: 1 utente, 2 PID, 5 VSZ, 6 RSS.`],
+['code', R`Copia tutti i .txt di resources in mydir.`, R`find resources -name [["*.txt"]] -type [[f]] -exec cp [[{}]] mydir [[\;]]`, [R`*.txt`, R`d`, R`$file`, R`;`], R`Le virgolette evitano che la shell espanda * prima di find.`],
+['code', R`File .txt con più righe in resources.`, R`find resources -name "*.txt" -exec [[wc -l]] {} \; | [[sort -nr]] | [[head -n 1]] | awk '{print $2}'`, [R`wc -c`, R`tail -n 1`, R`sort`], R`→ resources/B/A_test.txt (66 righe).`],
+['code', R`backup.sh: copia i .txt da sorgente a destinazione e conta i file.`, R`#!/bin/bash
+SRCDIR=[[$1]]
+BACKUPDIR=[[$2]]
+
+echo "Inizio backup in $BACKUPDIR ..."
+rm -rf $BACKUPDIR
+[[mkdir]] $BACKUPDIR
+find $SRCDIR -name "*.txt" -type f -exec cp {} $BACKUPDIR \;
+N=[[$(ls $BACKUPDIR | wc -l)]]
+echo "Fine backup di $N files."`, [R`$0`, R`touch`, R`$(ls $SRCDIR | wc -l)`, R`argv[1]`], R`Conta i file nella destinazione, cioè quelli copiati davvero.`],
+['code', R`grandi.sh: copia i .txt più grandi di 500 byte.`, R`#!/bin/bash
+sorgente=$1
+destinazione=$2
+b=500
+
+if [ [[! -d]] $destinazione ]
+[[then]]
+    mkdir $destinazione
+fi
+
+for file in [[$sorgente/*.txt]]
+[[do]]
+    grandezza=$(wc -c [[<]] $file)
+    if [ $grandezza [[-gt]] $b ]
+    then
+        cp $file $destinazione
+        echo "Copiato $file ($grandezza byte)"
+    fi
+[[done]]`, [R`-d`, R`sorgente/*.txt`, R`-lt`, R`fi`, R`>`], R`Errori che hai fatto: sorgente senza $, mancavano do/done e then/fi, [$x senza spazi.`],
+['code', R`conta.sh: quanti .txt ci sono nella cartella passata.`, R`#!/bin/bash
+var=[[$(]]find [[$1]] -name "*.txt" -type f | wc [[-l]])
+echo "In $1 ci sono $var file .txt"`, [R`'`, R`$0`, R`-c`], R`./conta.sh resources → 8 file .txt.`],
+['code', R`while read: copia i file elencati in lista.txt.`, R`cat lista.txt | [[while]] read NOME
+do
+    cp [[$NOME]] $DSTDIR/
+[[done]]`, [R`for`, R`NOME`, R`fi`], R`A ogni giro read mette una riga nella variabile.`],
+['ord', R`Creare ed eseguire uno script.`, [R`vim script.sh`, R`i, scrivi, Esc, :wq`, R`chmod +x script.sh`, R`./script.sh arg1 arg2`], R`Senza chmod +x non parte.`],
+]});
+
+// Banca domande — moduli 9–16.
+
+MODULES.push({ id: 'fs', title: 'File system', sub: 'Allocazione, i-node, ext2, link', items: [
+['fc', R`I 4 modi di allocare i blocchi`, R`**Contigua**: velocissima, ma frammentazione esterna e file che non crescono. **Lista concatenata**: accesso casuale lentissimo. **FAT**: puntatori in una tabella in RAM, enorme. **i-node**: attributi + indirizzi dei blocchi, in RAM solo quelli dei file aperti.`],
+['fc', R`Com'è fatto un i-node`, R`Attributi (proprietario, permessi, dimensione, date, **contatore di link**) + indirizzi dei **primi 10 blocchi** + blocco indiretto **singolo, doppio, triplo**.`],
+['fc', R`Hard link vs link simbolico`, R`**Hard** (ln): altro nome, **stesso i-node**, contatore +1; se cancelli l'originale il file resta. **Simbolico** (ln -s): file nuovo con il **percorso**, i-node suo; se cancelli l'originale il link è **rotto**.`],
+['fc', R`ext2: com'è diviso un gruppo`, R`superblock · descrittore del gruppo · bitmap dei blocchi · bitmap degli i-node · tabella degli i-node · blocchi di dati. Gruppi = file vicini alla loro directory.`],
+['fc', R`Tempo di accesso al disco`, R`**seek + rotazione (mezzo giro) + trasferimento**. Quasi tutto è seek + rotazione: leggere di più costa poco in più.`],
+['fc', R`Voce di directory: FAT vs UNIX`, R`FAT: nome + estensione + attributi + primo blocco. **UNIX: solo nome + numero di i-node**, gli attributi stanno nell'i-node.`],
+['mc', R`Il difetto dell'allocazione contigua è…`, [R`frammentazione esterna e file che non possono crescere`, R`accesso casuale lento`, R`tabella enorme in RAM`, R`puntatori che si rompono`], R`In compenso la lettura è velocissima: blocco n = inizio + n.`],
+['mc', R`Con le liste concatenate, per leggere il 10° blocco…`, [R`vanno letti i 9 precedenti`, R`si legge subito`, R`si consulta la FAT in RAM`, R`si usa l'i-node`], R`Accesso casuale lentissimo.`],
+['mc', R`Il problema della FAT è…`, [R`la tabella è enorme, sempre in RAM, e cresce con il disco`, R`l'accesso casuale è lento`, R`i file non crescono`, R`serve un i-node per file`], R`Una riga per ogni blocco del disco.`],
+['mc', R`Con dischi grandi vince l'i-node perché…`, [R`in RAM servono solo gli i-node dei file aperti`, R`è contiguo`, R`non ha attributi`, R`non usa blocchi indiretti`], R`k file aperti × n byte: non dipende dal disco.`],
+['mc', R`Un hard link ha…`, [R`lo stesso i-node dell'originale`, R`un i-node suo`, R`il percorso dell'originale`, R`contatore di link 0`], R`È un altro nome per lo stesso file.`],
+['mc', R`Cancelli l'originale di un link simbolico. Il link…`, [R`è rotto`, R`continua a funzionare`, R`diventa un hard link`, R`viene cancellato in automatico`], R`Contiene solo il percorso.`],
+['mc', R`Quando il contatore di link arriva a 0…`, [R`i dati vengono cancellati`, R`il file diventa un link simbolico`, R`il file diventa nascosto`, R`niente`], R`+1 a ogni hard link, −1 a ogni cancellazione.`],
+['mc', R`backup.sh: wc -c dà 183 byte, du -sh dà 4,0K. Perché?`, [R`Il disco ragiona a blocchi interi: frammentazione interna`, R`du conta anche i link`, R`wc -c sbaglia`, R`Il file è compresso`], R`Il resto del blocco è sprecato.`],
+['mc', R`Il superblock contiene…`, [R`info su tutto il file system: blocchi, i-node liberi, dimensione blocco, primo i-node`, R`i dati dei file`, R`la tabella delle partizioni`, R`l'MBR`], R`Il primo i-node è la directory radice /.`],
+['mc', R`In ext2 superblock e descrittori sono copiati in ogni gruppo. Quali si usano?`, [R`Solo quelli del gruppo 0`, R`Tutti`, R`Quelli dell'ultimo gruppo`, R`Quello del gruppo del file`], R`Le altre copie sono backup.`],
+['mc', R`Con UEFI la tabella delle partizioni (GPT) sta…`, [R`nel secondo blocco (backup nell'ultimo)`, R`nel settore 0`, R`nel superblock`, R`nell'MBR`], R`Con BIOS la tabella è alla fine dell'MBR, settore 0.`],
+['mc', R`Il comando file nome decide il tipo guardando…`, [R`il contenuto`, R`l'estensione`, R`l'i-node`, R`i permessi`], R`Es. il numero magico di un eseguibile ELF.`],
+['mc', R`ls -li mostra come primo numero…`, [R`il numero di i-node`, R`la dimensione`, R`il PID`, R`il contatore di link`], R`Il contatore di link è dopo i permessi.`],
+['mc', R`Blocchi grandi:`, [R`più veloci ma sprecano spazio`, R`più lenti ma non sprecano`, R`più veloci e non sprecano`, R`più lenti e sprecano`], R`Compromesso tipico: 4 KB.`],
+['mc', R`Limite di quota soft vs hard:`, [R`soft si supera con avvisi, hard no`, R`hard si supera con avvisi, soft no`, R`sono uguali`, R`soft vale solo per root`], R`Finiti gli avvisi, niente più accesso.`],
+['mc', R`Ogni processo ha già aperti i file descriptor…`, [R`0 stdin, 1 stdout, 2 stderr`, R`1 stdin, 2 stdout, 3 stderr`, R`0 stdout, 1 stdin, 2 stderr`, R`nessuno`], R`open restituisce il primo libero.`],
+['tf', R`In Linux l'estensione del file è controllata dal SO.`, false, R`È solo una convenzione.`],
+['tf', R`La memoria per gli i-node in RAM dipende dalla grandezza del disco.`, false, R`Dipende solo dai file aperti.`],
+['tf', R`Il problema degli hard link: se il proprietario cancella il file, questo continua a pesare sulla sua quota.`, true, R`Resta la voce dell'altro utente con contatore 1.`],
+['tf', R`Il link simbolico è più lento dell'hard link.`, true, R`Va letto il percorso e seguito pezzo per pezzo.`],
+['fill', R`In UNIX la voce di directory contiene solo [[nome]] e [[numero di i-node]]; gli attributi stanno [[nell'i-node]].`, [R`primo blocco`, R`nella voce`, R`estensione`], R`UNIX V7: 14 byte di nome + 2 byte di i-node.`],
+['num', R`FAT, disco da 1 TB, blocchi da 1 KB: la tabella ha 2 elevato a quante righe?`, 30, R`2⁴⁰ / 2¹⁰ = 2³⁰.`],
+['num', R`Lista dei blocchi liberi: blocco da 1 KB, numeri da 4 byte. Quanti numeri per blocco?`, 256, R`2¹⁰ / 2² = 2⁸ (255 liberi + 1 puntatore).`],
+['num', R`Lista dei blocchi liberi: blocco da 4 KB, numeri da 4 byte. Quanti numeri per blocco?`, 1024, R`2¹² / 2² = 2¹⁰.`],
+['num', R`Bitmap: un blocco da 1 KB descrive quanti blocchi?`, 8192, R`2¹⁰ byte × 2³ bit = 2¹³.`],
+['num', R`Bitmap: un blocco da 4 KB descrive quanti blocchi?`, 32768, R`2¹² × 2³ = 2¹⁵.`],
+['num', R`Traccia 1 MB, seek 5 ms, giro 8,33 ms. Tempo per leggere 1 MB (ms)?`, 17.5, R`5 + 4,165 + 8,33 ≈ 17,5.`, 0.1],
+['ord', R`Trovare /usr/ast/mbox: metti in ordine.`, [R`i-node di /`, R`directory / → "usr → i-node 6"`, R`i-node 6 → blocco 132`, R`blocco 132 → "ast → i-node 26"`, R`i-node 26 → blocco 406`, R`blocco 406 → "mbox → i-node 60"`, R`i-node 60 → attributi e blocchi`], R`Si alternano i-node e blocchi di directory; si parte dalla radice, l'unica in posizione nota.`],
+]});
+
+MODULES.push({ id: 'sync', title: 'Sincronizzazione', sub: 'Race condition, semafori, prod-cons', items: [
+['fc', R`Race condition`, R`Due o più processi leggono e scrivono **dati condivisi** e il **risultato dipende dall'ordine** di esecuzione. Causa: leggi → somma → scrivi non è atomico.`],
+['fc', R`Le 4 condizioni per una buona mutua esclusione`, R`1. mai due processi insieme nella regione critica · 2. nessuna ipotesi su velocità o numero di CPU · 3. chi è fuori non blocca gli altri · 4. nessuno aspetta per sempre.`],
+['fc', R`TSL`, R`Test and Set Lock: legge LOCK e scrive un valore ≠ 0 **in modo indivisibile**, bloccando il **bus**. Funziona ma con **busy waiting**.`],
+['fc', R`Semaforo: wait e signal`, R`**wait** (down, P): −1, se negativo si **blocca**. **signal** (up, V): +1, se c'è qualcuno in coda ne **sveglia uno**. Valore negativo = numero di processi in coda.`],
+['fc', R`Produttore-consumatore: i 3 semafori`, R`**mutex = 1** (uno alla volta) · **empty = N** (posti liberi, blocca il produttore) · **full = 0** (posti occupati, blocca il consumatore). **Prima empty/full, poi mutex.**`],
+['fc', R`Inversione di priorità`, R`L (bassa) è nella regione critica; H (alta) gira in busy waiting sul lock; lo scheduler dà sempre la CPU a H → **L non libera mai il lock**.`],
+['fc', R`Lettori-scrittori`, R`db = 1, rc = 0, mutex = 1. Il **primo lettore** prende db, l'**ultimo** lo libera. Difetto: **starvation dello scrittore**.`],
+['mc', R`conto = 100, due processi fanno conto = conto + 10 senza protezione. Risultato possibile sbagliato?`, [R`110`, R`120`, R`100`, R`130`], R`Entrambi leggono 100 e scrivono 110.`],
+['mc', R`Quale NON è una delle 4 condizioni per una buona soluzione?`, [R`I processi devono avere la stessa priorità`, R`Mai due processi insieme nelle regioni critiche`, R`Nessuna ipotesi sulla velocità`, R`Nessuno aspetta per sempre`], R`Le altre tre sono condizioni vere (manca: chi è fuori non blocca).`],
+['mc', R`Disabilitare gli interrupt per la mutua esclusione non funziona perché…`, [R`vale solo sulla propria CPU e un processo utente potrebbe non riattivarli`, R`è troppo lento`, R`causa page fault`, R`richiede TSL`], R`Con più CPU gli altri core continuano.`],
+['mc', R`La variabile lock (se 0 metti 1 ed entra) fallisce perché…`, [R`leggere e scrivere lock sono due passi separati`, R`usa busy waiting`, R`serve il DMA`, R`lock è condiviso`], R`Stesso problema del conto: entrano in due.`],
+['mc', R`Il problema che resta con TSL è…`, [R`il busy waiting`, R`la race condition`, R`non funziona su più CPU`, R`non è atomica`], R`E l'inversione di priorità.`],
+['mc', R`Un semaforo vale −3. Significa che…`, [R`ci sono 3 processi in coda`, R`3 processi possono entrare`, R`è guasto`, R`3 signal sono andate perse`], R`Il valore assoluto del negativo.`],
+['mc', R`Mutex inizializzato a 0:`, [R`il primo si blocca e nessuno entrerà mai`, R`funziona come a 1`, R`entrano tutti`, R`entrano due processi`], R`Tutti bloccati.`],
+['mc', R`Mutex inizializzato a 2:`, [R`due processi dentro insieme: niente mutua esclusione`, R`tutti bloccati`, R`funziona come a 1`, R`deadlock sicuro`], R`Il valore iniziale = quanti possono stare dentro insieme.`],
+['mc', R`Produttore-consumatore, buffer da N: valori iniziali di empty e full?`, [R`empty = N, full = 0`, R`empty = 0, full = N`, R`empty = 1, full = 1`, R`empty = N, full = N`], R`All'inizio il buffer è vuoto (errore che hai fatto: li avevi invertiti).`],
+['mc', R`Il produttore fa down(mutex) PRIMA di down(empty) e il buffer è pieno. Cosa succede?`, [R`Deadlock: si blocca su empty tenendo il mutex`, R`Niente, funziona`, R`Il consumatore produce`, R`Race condition`], R`Il consumatore si blocca sul mutex e non libera mai un posto.`],
+['mc', R`Il produttore-consumatore è un caso di…`, [R`competizione e cooperazione insieme`, R`solo competizione`, R`solo cooperazione`, R`interferenza`], R`Buffer conteso + ordine prima produci poi consuma.`],
+['mc', R`La competizione richiede una sincronizzazione…`, [R`indiretta (implicita)`, R`diretta (esplicita)`, R`assente`, R`tramite messaggi`], R`La cooperazione invece è diretta.`],
+['mc', R`Nei lettori-scrittori, mutex protegge…`, [R`la variabile rc`, R`il database`, R`gli scrittori`, R`la coda dei processi`], R`rc è condiviso tra i lettori.`],
+['mc', R`Il difetto della soluzione lettori-scrittori vista è…`, [R`starvation dello scrittore`, R`deadlock dei lettori`, R`race condition su rc`, R`busy waiting`], R`Se arrivano sempre lettori, rc non torna a 0.`],
+['tf', R`Concorrenza vuol dire per forza parallelismo.`, false, R`Su un solo core i processi si alternano.`],
+['tf', R`Con i semafori chi aspetta fa busy waiting.`, false, R`Si blocca: niente busy waiting.`],
+['tf', R`signal fa sempre +1, ma sveglia qualcuno solo se c'è qualcuno in coda.`, true, R`Errore fatto: svegliare un processo che non era in coda.`],
+['tf', R`wait e signal sono operazioni indivisibili.`, true, R`Il SO disattiva un attimo gli interrupt o usa TSL/XCHG.`],
+['num', R`S = 2. A fa wait, B fa wait, C fa wait. Quanto vale S?`, -1, R`2 → 1 → 0 → −1: C si blocca.`],
+['num', R`S = 1. A wait, B wait, A signal. Quanto vale S?`, 0, R`1 → 0 → −1 (B bloccato) → 0, B svegliato.`],
+['num', R`N = 2, buffer vuoto. Il produttore fa 3 down(empty) di fila. Quanto vale empty?`, -1, R`2 → 1 → 0 → −1: si blocca al terzo.`],
+['code', R`Produttore con semafori.`, R`void producer() {
+    while (TRUE) {
+        item = produce_item();
+        down([[&empty]]);
+        down([[&mutex]]);
+        insert_item(item);
+        up([[&mutex]]);
+        up([[&full]]);
+    }
+}`, [R`&db`, R`empty`], R`Prende un posto libero, segnala un posto occupato.`],
+['code', R`Consumatore con semafori.`, R`void consumer() {
+    while (TRUE) {
+        down([[&full]]);
+        down([[&mutex]]);
+        item = remove_item();
+        up([[&mutex]]);
+        up([[&empty]]);
+        consume_item(item);
+    }
+}`, [R`&db`, R`&rc`], R`Il contrario del produttore.`],
+['code', R`Lettore.`, R`void reader() {
+    down(&mutex);
+    rc++;
+    if (rc == [[1]]) down([[&db]]);
+    up(&mutex);
+    read_db();
+    down(&mutex);
+    rc--;
+    if (rc == [[0]]) up(&db);
+    up(&mutex);
+}`, [R`2`, R`&mutex`, R`-1`], R`Il primo lettore prende db per tutto il gruppo, l'ultimo lo libera.`],
+['code', R`TSL: entrata nella regione critica.`, R`enter_region:  [[TSL]] REGISTER, LOCK
+               CMP REGISTER, #0
+               [[JNE]] enter_region
+               RET
+leave_region:  MOVE LOCK, #[[0]]
+               RET`, [R`JMP`, R`1`, R`MOV`], R`Se LOCK era ≠ 0 riprova: busy waiting.`],
+]});
+
+MODULES.push({ id: 'ipc', title: 'Programmazione IPC', sub: 'shmget, semget, prodcons.c', practice: true, items: [
+['fc', R`shmget + shmat`, R`shm_id = **shmget**(chiave, byte, **IPC_CREAT** | 0666) → solo un numero. buffer = (int *) **shmat**(shm_id, NULL, 0) → il puntatore. **Mai dimenticare shmat.**`],
+['fc', R`semget + semctl`, R`semid = **semget**(chiave, 3, IPC_CREAT | 0666) crea un **array** di 3 semafori. **semctl**(semid, MUTEX, **SETVAL**, 1) inizializza. Inizializzare **una volta sola**.`],
+['fc', R`ipcs e ipcrm`, R`**ipcs** elenca le risorse (−m memoria, −s semafori). **ipcrm -m ID** / **ipcrm -s ID** le cancella. Le risorse **restano** dopo la fine del programma.`],
+['fc', R`sem_wait del prof`, R`struct sembuf: sem_num = **quale** semaforo, sem_op = **−1** (wait) o **+1** (signal), sem_flg = 0. Poi **semop**(id, &sem_buf, 1). semop è atomica.`],
+['fc', R`Buffer del prof`, R`N interi + 1: **buffer[N] = indice della prima posizione libera**, all'inizio 0. Logica **LIFO**. produci/consuma non controllano pieno/vuoto: ci pensano i semafori.`],
+['fc', R`I tuoi errori ricorrenti in IPC`, R`**pid == 1** invece di 0 · **IPC_CREATE** invece di IPC_CREAT · **sem_wait(EMPTY)** senza semid · **EMPTY/FULL invertiti** · segfault per **vecchie risorse** (ipcrm) · controlli if (id < 0) messi in fondo.`],
+['mc', R`int x = 0; if (fork() == 0) { x = 5; exit(0); } wait(NULL); printf("%d", x); stampa…`, [R`0`, R`5`, R`un valore a caso`, R`errore`], R`Il figlio cambia la sua copia: per questo serve la memoria condivisa.`],
+['mc', R`Il flag per creare la risorsa si scrive…`, [R`IPC_CREAT`, R`IPC_CREATE`, R`IPC_NEW`, R`O_CREAT`], R`Senza la E finale.`],
+['mc', R`shmget restituisce…`, [R`un id (o −1 se errore): poi serve shmat`, R`il puntatore alla memoria`, R`il valore del semaforo`, R`il PID`], R`Solo shmat dà il puntatore.`],
+['mc', R`Hai un segmentation fault su buffer[N] = 0 dopo aver lanciato prima mutex.c con la stessa chiave. Perché?`, [R`La chiave esisteva con dimensione più piccola: shmget fallisce (−1) e shmat non è valido`, R`N è troppo grande`, R`Manca #include <stdio.h>`, R`Il semaforo vale 0`], R`Soluzione: ipcs e poi ipcrm -m ID.`],
+['mc', R`semget(0x11, 3, IPC_CREAT | 0666) crea…`, [R`un array di 3 semafori`, R`un semaforo con valore 3`, R`3 memorie condivise`, R`un semaforo per 3 processi`], R`I #define MUTEX 0, EMPTY 1, FULL 2 danno un nome agli indici.`],
+['mc', R`sem_op = 0 significa…`, [R`aspetta che il semaforo valga 0`, R`signal`, R`wait`, R`cancella il semaforo`], R`−1 wait, +1 signal.`],
+['mc', R`sem_wait(EMPTY) dà "too few arguments" perché…`, [R`servono due parametri: sem_wait(semid, EMPTY)`, R`EMPTY non è definito`, R`manca il &`, R`sem_wait non esiste`], R`Primo parametro: l'id dell'array.`],
+['mc', R`Due processi fanno entrambi SETVAL sugli stessi semafori. Problema?`, [R`Il secondo riazzera i valori mentre il primo li usa`, R`Nessuno`, R`Deadlock sicuro`, R`I semafori vengono cancellati`], R`Soluzione: crearli una volta nel padre prima della fork.`],
+['mc', R`Perché shmget, shmat e semget vanno PRIMA della fork?`, [R`Così il figlio eredita id e puntatore: stessa memoria, stesso semaforo`, R`Perché dopo la fork non si possono chiamare`, R`Per velocità`, R`Non importa`], R`Dopo la fork il figlio ha una copia dei valori, puntatore compreso.`],
+['mc', R`sizeof(int)*(N+1)+1: cosa c'è di sbagliato?`, [R`Il +1 finale aggiunge un byte, non un intero (e non serve)`, R`Manca un intero`, R`Niente`, R`Bisogna usare sizeof(char)`], R`Il posto per l'indice è già in (N+1).`],
+['mc', R`prodcons.c (N = 3, produce 10…60): gli ultimi tre consumati sono…`, [R`60, 50, 30`, R`30, 50, 60`, R`40, 50, 60`, R`10, 20, 30`], R`LIFO: esce l'ultimo inserito.`],
+['mc', R`Nel prodcons il produttore è il figlio. Dopo il for il figlio deve…`, [R`fare exit(0)`, R`fare wait`, R`fare un'altra fork`, R`cancellare i semafori`], R`Altrimenti eseguirebbe anche il codice del padre.`],
+['mc', R`Dove vanno i controlli if (shm_id < 0)?`, [R`Subito dopo la chiamata`, R`In fondo al main`, R`Prima della chiamata`, R`Solo nel figlio`], R`Errore che hai fatto: messi in fondo.`],
+['mc', R`In mutex.c l'output alterna PADRE e FIGLIO. Il semaforo garantisce…`, [R`che non entrino in due insieme, non l'ordine`, R`l'alternanza perfetta`, R`che il padre vada sempre per primo`, R`niente`], R`Il valore finale è comunque sempre 10.`],
+['tf', R`Le risorse IPC restano nel sistema dopo la fine del programma.`, true, R`Si cancellano con ipcrm.`],
+['tf', R`semop è atomica.`, true, R`Per questo wait e signal funzionano.`],
+['tf', R`Stessa chiave = stessa risorsa IPC.`, true, R`Anche tra programmi diversi.`],
+['num', R`contatori.c: 3 figli, 4 incrementi ciascuno con mutex. Valore finale?`, 12, R`3 × 4. Senza mutex potrebbe essere meno.`],
+['num', R`N = 4, buffer [120][280][ ][ ]. Quanto vale buffer[N]?`, 2, R`Indice della prima posizione libera.`],
+['code', R`Crea e collega la memoria condivisa per N interi + indice.`, R`int shm_id = [[shmget]](0xaa, sizeof(int)*([[N+1]]), [[IPC_CREAT]] | 0666);
+if (shm_id < 0) { perror("shmget"); exit(1); }
+int *buffer = (int *) [[shmat]](shm_id, [[NULL]], 0);
+buffer[N] = [[0]];`, [R`IPC_CREATE`, R`N`, R`shmctl`, R`semget`, R`1`], R`buffer[N] = 0: buffer vuoto.`],
+['code', R`Crea e inizializza i 3 semafori del prod-cons.`, R`int semid = [[semget]](0x11, [[3]], IPC_CREAT | 0666);
+if (semid < 0) { perror("semget"); exit(1); }
+semctl(semid, MUTEX, [[SETVAL]], [[1]]);
+semctl(semid, EMPTY, SETVAL, [[N]]);
+semctl(semid, FULL,  SETVAL, [[0]]);`, [R`shmget`, R`GETVAL`, R`2`], R`EMPTY = N posti liberi, FULL = 0 occupati.`],
+['code', R`prodcons.c: il figlio produce 6 valori.`, R`pid_t pid = fork();
+if (pid == [[0]]) {
+    for (int i = 1; i <= 6; i++) {
+        sem_wait(semid, [[EMPTY]]);
+        sem_wait(semid, [[MUTEX]]);
+        produci(buffer, N, i * 10);
+        sem_signal(semid, MUTEX);
+        sem_signal(semid, [[FULL]]);
+        sleep(1);
+    }
+    [[exit(0)]];
+}`, [R`1`, R`return 0`, R`wait(NULL)`], R`Prima EMPTY, poi MUTEX.`],
+['code', R`prodcons.c: il padre consuma 6 valori e aspetta il figlio.`, R`for (int i = 1; i <= 6; i++) {
+    sem_wait(semid, [[FULL]]);
+    sem_wait(semid, MUTEX);
+    int val = [[consuma]](buffer, N);
+    sem_signal(semid, MUTEX);
+    sem_signal(semid, [[EMPTY]]);
+    sleep(2);
+}
+[[wait(NULL)]];
+return 0;`, [R`produci`, R`exit(0)`, R`MUTEX`], R`Il consumatore fa il contrario del produttore.`],
+['code', R`sem_wait del prof.`, R`void sem_wait(int id_sem, int numsem) {
+    struct sembuf sem_buf;
+    sem_buf.sem_num = [[numsem]];
+    sem_buf.sem_op  = [[-1]];
+    sem_buf.sem_flg = [[0]];
+    [[semop]](id_sem, &sem_buf, 1);
+}`, [R`+1`, R`id_sem`, R`semctl`], R`sem_signal è uguale con sem_op = +1.`],
+['code', R`mutex.c: il figlio incrementa il contatore 5 volte.`, R`if (pid == 0) {
+    for (int i = 0; i < 5; i++) {
+        sem_wait([[semid]], [[MUTEX]]);
+        [[(*contatore)++]];
+        printf("[FIGLIO] contatore = %d\n", *contatore);
+        sem_signal(semid, MUTEX);
+        sleep(1);
+    }
+    exit(0);
+}`, [R`contatore++`, R`EMPTY`, R`shm_id`], R`contatore++ incrementerebbe il puntatore, non il valore.`],
+['ord', R`Ordine delle operazioni in prodcons.c.`, [R`shmget + shmat`, R`buffer[N] = 0`, R`semget + semctl SETVAL`, R`fork`, R`figlio produce ed esce`, R`padre consuma`, R`padre fa wait`], R`Tutto ciò che va condiviso si crea prima della fork.`],
+]});
+
+MODULES.push({ id: 'dead', title: 'Deadlock', sub: '4 condizioni, grafo, banchiere', items: [
+['fc', R`Deadlock: definizione`, R`Un insieme di processi in cui **ognuno aspetta un evento che può causare solo un altro processo dell'insieme**.`],
+['fc', R`Le 4 condizioni`, R`1. **Mutua esclusione** · 2. **Possesso e attesa** · 3. **Impossibilità di prelazione** · 4. **Attesa circolare**. Devono valere **tutte insieme**: basta romperne una.`],
+['fc', R`Le 4 strategie`, R`**Ignorare** (struzzo) · **Rilevare e risolvere** · **Evitare** (stati sicuri, banchiere) · **Prevenire** (rompere una condizione, es. ordine delle risorse).`],
+['fc', R`Stato sicuro`, R`Esiste **almeno un ordine** in cui tutti finiscono, anche se tutti chiedessero subito il massimo. Sicuro → nessun deadlock; non sicuro → deadlock **possibile**.`],
+['fc', R`Algoritmo del banchiere`, R`Manca = Max − Ha; Libere = totale − somma Ha. Trova chi ha Manca ≤ Libere, finisce, **Libere += il suo Ha**. Tutti finiscono → sicuro. La richiesta si concede solo se lo stato dopo resta sicuro.`],
+['fc', R`Deadlock, livelock, starvation`, R`**Deadlock**: bloccati, nessun progresso. **Livelock**: attivi ma senza progressi (si scansano all'infinito). **Starvation**: uno aspetta per sempre perché la risorsa va ad altri; è **ready**, non bloccato.`],
+['mc', R`Quale NON è una delle 4 condizioni del deadlock?`, [R`Preemption obbligatoria`, R`Mutua esclusione`, R`Possesso e attesa`, R`Attesa circolare`], R`La terza è proprio l'impossibilità di prelazione.`],
+['mc', R`Far prendere a tutti le risorse nello stesso ordine rompe…`, [R`l'attesa circolare`, R`la mutua esclusione`, R`il possesso e attesa`, R`l'impossibilità di prelazione`], R`Come EMPTY/FULL prima di MUTEX.`],
+['mc', R`L'algoritmo dello struzzo consiste nel…`, [R`ignorare il problema`, R`togliere risorse a forza`, R`uccidere tutti i processi`, R`ordinare le risorse`], R`I deadlock sono rari rispetto ad altri crash: molto usato.`],
+['mc', R`Evitare i deadlock (avoidance) richiede…`, [R`conoscere in anticipo le risorse massime necessarie`, R`ignorarli`, R`un grafo senza risorse`, R`più CPU`], R`Per questo è difficile in pratica.`],
+['mc', R`Grafo con un ciclo, una risorsa per tipo:`, [R`deadlock sicuro`, R`deadlock possibile`, R`nessun deadlock`, R`livelock`], R`Con più risorse per tipo: deadlock possibile.`],
+['mc', R`Grafo con un ciclo, più risorse per tipo:`, [R`deadlock possibile`, R`deadlock sicuro`, R`nessun deadlock`, R`starvation`], R`Senza cicli: mai deadlock.`],
+['mc', R`Nel grafo, la freccia □R → ○A significa…`, [R`R è posseduta da A`, R`A aspetta R`, R`A rilascia R`, R`R aspetta A`], R`○B → □S: B aspetta S.`],
+['mc', R`Rilevamento: quando un processo "finisce", A diventa A + …`, [R`la sua riga di C (quello che possiede)`, R`la sua riga di R`, R`E`, R`niente`], R`R erano solo richieste; C è ciò che restituisce.`],
+['mc', R`Totale 10. A: Ha 3, Max 9 · B: Ha 2, Max 4 · C: Ha 2, Max 7. Lo stato è…`, [R`sicuro, ordine B, C, A`, R`non sicuro`, R`sicuro, ordine A, B, C`, R`deadlock`], R`Libere 3: B (2) → 5, C (5) → 7, A (6) → fine.`],
+['mc', R`Stesso esempio, A chiede 1 risorsa in più. Il banchiere…`, [R`la rinvia: lo stato diventerebbe non sicuro`, R`la concede`, R`uccide A`, R`toglie una risorsa a B`], R`Libere 2: B finisce → 4; C e A hanno bisogno di 5.`],
+['mc', R`Totale 12. P1: 5/10 · P2: 2/4 · P3: 2/9. Ordine sicuro?`, [R`P2, P1, P3`, R`P1, P2, P3`, R`P3, P2, P1`, R`non sicuro`], R`Libere 3 → P2 → 5 → P1 → 10 → P3 → 12.`],
+['mc', R`Quale NON è un metodo per risolvere un deadlock?`, [R`Aumentare il quanto di tempo`, R`Prelazione della risorsa`, R`Eliminare processi`, R`Checkpoint e rollback`], R`Eliminare processi è il più semplice.`],
+['mc', R`Una risorsa prelazionabile è…`, [R`la CPU o la memoria`, R`una stampante a metà stampa`, R`un record di database bloccato`, R`un semaforo`], R`Si può togliere senza danni.`],
+['mc', R`Due processi prendono una risorsa a testa con try_lock, falliscono sulla seconda, rilasciano e riprovano all'infinito. È…`, [R`livelock`, R`deadlock`, R`starvation`, R`race condition`], R`Non sono bloccati, ma non fanno progressi.`],
+['tf', R`Uno stato non sicuro porta per forza a un deadlock.`, false, R`Il deadlock è solo possibile.`],
+['tf', R`La starvation è un tipo di deadlock.`, false, R`Il processo è ready, gli altri progrediscono.`],
+['tf', R`Basta che una sola delle 4 condizioni non valga per escludere il deadlock.`, true, R`È l'idea della prevenzione.`],
+['fill', R`Le 4 condizioni: [[mutua esclusione]], [[possesso e attesa]], impossibilità di [[prelazione]], [[attesa circolare]].`, [R`starvation`, R`busy waiting`], R`Devono valere tutte insieme.`],
+['num', R`Totale 12. P1 ha 5, P2 ha 2, P3 ha 2. Quante risorse libere?`, 3, R`12 − 9.`],
+['num', R`Totale 10. A Ha 3 Max 9, B Ha 2 Max 4, C Ha 2 Max 7. Libere dopo che B è finito?`, 5, R`3 + 2 (le risorse di B).`],
+]});
+
+MODULES.push({ id: 'io', title: 'Input/Output', sub: 'DMA, driver, scheduling del disco', items: [
+['fc', R`I/O programmato, a interrupt, DMA`, R`**Programmato**: la CPU trasferisce in **busy waiting**. **A interrupt**: la CPU trasferisce nella ISR, **un interrupt per carattere**. **DMA**: un chip trasferisce, **un solo interrupt alla fine**.`],
+['fc', R`Port-mapped vs memory-mapped`, R`**Port-mapped**: porte separate, istruzioni IN/OUT. **Memory-mapped**: registri su indirizzi di memoria, istruzioni normali; protezione con la memoria virtuale; ma attenzione alla **cache**.`],
+['fc', R`Major e minor number`, R`In /dev ogni dispositivo è un file. **Major** = classe → **quale driver**. **Minor** = **quale istanza** (quale disco o partizione).`],
+['fc', R`Livelli del software di I/O`, R`Utente (librerie) → indipendente dal dispositivo → **driver** → gestori degli interrupt → hardware.`],
+['fc', R`Scheduling del braccio`, R`**FCFS**: equo, tanta strada. **SSF**: la più vicina, poca strada ma **starvation** ai bordi. **Ascensore**: una direzione finché ci sono richieste, niente starvation.`],
+['fc', R`SSD`, R`Nessuna parte mobile. **Legge e scrive a pagine**, **cancella a blocchi**. Lettura molto più veloce della scrittura. **FTL** distribuisce le scritture (wear leveling).`],
+['mc', R`Devi copiare 1 MB dal disco. Quale tecnica?`, [R`DMA`, R`I/O programmato`, R`I/O a interrupt`, R`busy waiting`], R`Errore che hai fatto: il disco è lentissimo, con il programmato la CPU gira a vuoto.`],
+['mc', R`Il SO parla con…`, [R`il controller`, R`direttamente il dispositivo`, R`il BIOS`, R`la MMU`], R`Il controller è la parte elettronica tra computer e dispositivo.`],
+['mc', R`Quale è un dispositivo a blocchi?`, [R`SSD`, R`tastiera`, R`mouse`, R`stampante`], R`A blocchi = indirizzabile. Il clock non è né l'uno né l'altro.`],
+['mc', R`Un vantaggio del memory-mapped I/O è…`, [R`la protezione la fa la memoria virtuale`, R`i registri vanno in cache`, R`servono istruzioni speciali`, R`non serve il controller`], R`Basta non mappare quelle pagine ai processi utente.`],
+['mc', R`Il problema del memory-mapped I/O è…`, [R`la cache: i registri non vanno messi in cache`, R`servono IN/OUT`, R`non si può programmare in C`, R`è più lento del DMA`], R`Bit caching disabilitato nella PTE.`],
+['mc', R`Con l'I/O a interrupt, quanti interrupt per stampare una stringa?`, [R`uno per carattere`, R`uno alla fine`, R`nessuno`, R`due`], R`Con il DMA uno solo alla fine.`],
+['mc', R`Il DMA usa indirizzi…`, [R`fisici`, R`virtuali`, R`di porta`, R`logici del processo`], R`Il SO converte l'indirizzo virtuale del buffer.`],
+['mc', R`DMA che ruba il bus una parola alla volta:`, [R`cycle stealing`, R`burst`, R`fly-by`, R`flow-through`], R`Burst = un blocco intero.`],
+['mc', R`In ls -la /dev/sda la prima lettera b significa…`, [R`dispositivo a blocchi`, R`binario`, R`bloccato`, R`backup`], R`c = a caratteri.`],
+['mc', R`Il major number indica…`, [R`quale driver`, R`quale partizione`, R`la dimensione`, R`il proprietario`], R`Il minor indica l'istanza.`],
+['mc', R`I driver fanno parte del kernel, tranne…`, [R`nel microkernel (MINIX)`, R`in Linux`, R`in Windows`, R`mai`], R`Nel microkernel girano in user mode.`],
+['mc', R`Il difetto dell'algoritmo SSF è…`, [R`starvation delle richieste ai bordi`, R`fa troppa strada`, R`non conosce la posizione`, R`è ingiusto con le richieste vicine`], R`L'ascensore lo risolve.`],
+['mc', R`Gli SSD…`, [R`leggono a pagine e cancellano a blocchi`, R`leggono e cancellano a pagine`, R`hanno bisogno dell'ascensore`, R`scrivono più veloce di quanto leggono`], R`Per riscrivere una pagina va cancellato il suo blocco (ciclo P/E).`],
+['tf', R`Gli algoritmi di scheduling del braccio servono anche agli SSD.`, false, R`Solo agli HDD.`],
+['tf', R`Il buffering in output sblocca subito il processo.`, true, R`I dati vengono copiati nel buffer del kernel.`],
+['num', R`Braccio su 11, richieste 1, 36, 16, 34, 9, 12. FCFS: cilindri percorsi?`, 111, R`10 + 35 + 20 + 18 + 25 + 3.`],
+['num', R`Braccio su 11, richieste 1, 36, 16, 34, 9, 12. SSF: cilindri percorsi?`, 61, R`11 → 12 → 9 → 16 → 1 → 34 → 36.`],
+['num', R`Braccio su 11, richieste 1, 36, 16, 34, 9, 12. Ascensore (parte verso l'alto): cilindri?`, 60, R`Salita 36 − 11 = 25, discesa 36 − 1 = 35.`],
+['num', R`Braccio su 20, richieste 10, 22, 20, 2, 40, 6, 38. Ascensore verso l'alto: cilindri?`, 58, R`Salita 40 − 20 = 20, discesa 40 − 2 = 38.`],
+['num', R`Braccio su 20, richieste 10, 22, 20, 2, 40, 6, 38. SSF: cilindri?`, 60, R`20 → 20 → 22 → 10 → 6 → 2 → 38 → 40.`],
+['ord', R`DMA: metti in ordine.`, [R`La CPU programma il DMA (indirizzo, count, direzione)`, R`Il DMA chiede al controller di leggere`, R`Il dato viene scritto in memoria`, R`Il controller manda l'ack, count − 1`, R`Finito il count, il DMA manda UN interrupt`], R`I passi 2–4 si ripetono finché count > 0.`],
+['ord', R`Livelli del software di I/O, dall'alto al basso.`, [R`Software a livello utente`, R`Software indipendente dal dispositivo`, R`Driver dei dispositivi`, R`Gestori degli interrupt`, R`Hardware (controller)`], R`Il driver scrive nei registri del controller.`],
+]});
+
+MODULES.push({ id: 'virt', title: 'Virtualizzazione', sub: 'Hypervisor, Popek-Goldberg, tecniche', items: [
+['fc', R`VMM (hypervisor)`, R`Crea l'illusione di **più macchine virtuali** sullo stesso hardware. **Host** = hardware sotto, **guest** = SO a cui dà una copia virtuale dell'host.`],
+['fc', R`Hypervisor tipo 1 vs tipo 2`, R`**Tipo 1** (nativo, bare-metal): è il solo programma nella modalità più privilegiata, come un SO le cui "applicazioni" sono i guest. **Tipo 2** (hosted): un programma eseguito da un SO host.`],
+['fc', R`Popek e Goldberg (1974)`, R`Una macchina è virtualizzabile **solo se le istruzioni sensibili sono un sottoinsieme di quelle privilegiate** (cioè causano trap in user mode).`],
+['fc', R`Problema di x86`, R`**17 istruzioni sensibili non privilegiate** (es. popf): non generavano trap. Risolto nel **2005** con **VT** (Intel) e **SVM** (AMD).`],
+['fc', R`Le 4 tecniche`, R`**Emulazione** (fetch-decode-execute in software) · **trap-and-emulate** (le privilegiate fanno trap nel VMM) · **binary translation** (VMware '99, istruzioni sensibili sostituite) · **paravirtualizzazione** (guest modificato, hypercall).`],
+['fc', R`Come un VMM dà l'illusione delle risorse`, R`**Multiplexing temporale** (es. CPU), **partizionamento** (es. memoria), **mediazione**.`],
+['mc', R`Hypervisor di tipo 1 è detto anche…`, [R`nativo o bare-metal`, R`hosted`, R`paravirtualizzato`, R`container`], R`Tipo 2 = hosted.`],
+['mc', R`VirtualBox, che gira come programma dentro Windows o Linux, è un hypervisor di…`, [R`tipo 2`, R`tipo 1`, R`tipo 0`, R`è un container`], R`Gira sopra un SO host.`],
+['mc', R`Condizione di Popek e Goldberg:`, [R`istruzioni sensibili ⊆ istruzioni privilegiate`, R`istruzioni privilegiate ⊆ sensibili`, R`nessuna istruzione privilegiata`, R`tutte le istruzioni causano trap`], R`Le sensibili devono causare trap in user mode.`],
+['mc', R`Un'istruzione sensibile è…`, [R`un'istruzione che si comporta diversamente in user e kernel mode`, R`un'istruzione che causa sempre trap`, R`un'istruzione aritmetica`, R`un'istruzione di salto`], R`Es. I/O, modifica della MMU, popf.`],
+['mc', R`Quante istruzioni sensibili non privilegiate aveva x86?`, [R`17`, R`4`, R`128`, R`0`], R`Per questo x86 non era virtualizzabile fino al 2005.`],
+['mc', R`Il problema di x86 fu risolto nel 2005 con…`, [R`Intel VT e AMD SVM`, R`la paravirtualizzazione`, R`i container`, R`il ring 2`], R`Virtualization Technology, Secure Virtual Machine.`],
+['mc', R`VMware nel 1999 virtualizzava x86 con…`, [R`binary translation`, R`trap-and-emulate con VT`, R`hypercall`, R`emulazione pura`], R`Le istruzioni sensibili del kernel guest vengono sostituite; traduzioni in cache; guest in ring 1.`],
+['mc', R`Nella binary translation il guest OS gira nel ring…`, [R`1`, R`0`, R`3`, R`2`], R`Ha più privilegi dei processi utente (ring 3) ma meno del VMM.`],
+['mc', R`Nella paravirtualizzazione il guest…`, [R`è modificato e usa hypercall verso l'hypervisor`, R`non sa di essere virtualizzato`, R`gira senza hypervisor`, R`è emulato istruzione per istruzione`], R`Il guest è "consapevole".`],
+['mc', R`Un emulatore…`, [R`imita il processore in software con un loop fetch-decode-execute`, R`esegue tutto direttamente sulla CPU`, R`usa le hypercall`, R`condivide il kernel con l'host`], R`La execute è uno switch con un case per istruzione.`],
+['mc', R`Nel trap-and-emulate, quando il guest esegue cli…`, [R`fa trap nel VMM, che la emula sullo stato virtuale`, R`disabilita davvero gli interrupt`, R`viene ignorata`, R`il guest termina`], R`Il VMM modifica una struttura dati della CPU virtuale.`],
+['tf', R`Nella paravirtualizzazione il guest sa di essere virtualizzato.`, true, R`È modificato apposta.`],
+['tf', R`Un hypervisor di tipo 2 gira direttamente sull'hardware.`, false, R`Quello è il tipo 1.`],
+['tf', R`Il VMM deve isolare i guest tra loro ed essere protetto da essi.`, true, R`Controlla l'accesso a CPU, memoria e I/O.`],
+['fill', R`Una macchina è virtualizzabile se le istruzioni [[sensibili]] sono un sottoinsieme di quelle [[privilegiate]].`, [R`aritmetiche`, R`utente`], R`Popek e Goldberg, 1974.`],
+['fill', R`Il VMM dà l'illusione delle risorse con multiplexing [[temporale]], [[partizionamento]] e [[mediazione]].`, [R`swapping`, R`paginazione`], R`Es. CPU a turno, memoria partizionata.`],
+]});
+
+MODULES.push({ id: 'docker', title: 'Container e Docker', sub: 'Dockerfile, build, run: prova pratica', practice: true, items: [
+['fc', R`Container vs VM`, R`La VM ospita un **SO guest intero** su hardware virtuale. Il container **non virtualizza hardware e condivide il kernel con l'host**: molto più piccolo. Pro: ciclo di vita, distribuzione, overhead. Contro: sicurezza, isolamento.`],
+['fc', R`Meccanismi dei container`, R`**chroot** (cambia la root directory) · **namespaces** (ognuno vede i suoi pid, rete…) · **cgroup** (limita CPU, memoria, disco, rete) · **cpuset** (associa core e memoria).`],
+['fc', R`Image vs container`, R`**Image**: template **read-only** (da Dockerfile o da un registry). **Container**: **istanza eseguibile** di una image; le modifiche non toccano la image.`],
+['fc', R`Le istruzioni del Dockerfile`, R`**FROM** base · **RUN** comandi al build (installare pacchetti) · **ADD** copia dall'host al container · **EXPOSE** porta in ascolto · **CMD** comando all'avvio.`],
+['fc', R`Opzioni di docker run`, R`**-i** interattivo · **-t** terminale · **--name** nome · **-d** background · **-p h:e** porta e sulla porta h dell'host · **-P** porte esposte su porte random.`],
+['mc', R`Un container…`, [R`condivide il kernel con l'host`, R`ha un SO guest completo`, R`virtualizza l'hardware`, R`richiede un hypervisor di tipo 1`], R`Per questo è più leggero di una VM.`],
+['mc', R`Nel Dockerfile, quale istruzione viene eseguita durante il build?`, [R`RUN`, R`CMD`, R`EXPOSE`, R`FROM`], R`CMD è il comando all'avvio del container.`],
+['mc', R`CMD nel Dockerfile è…`, [R`il comando da eseguire quando il container parte`, R`il comando del build`, R`la base dell'immagine`, R`la porta`], R`Se passi un comando a docker run, sovrascrive CMD.`],
+['mc', R`ADD "application.py" "/tmp/application.py" fa…`, [R`copia il file dall'host al container`, R`installa Flask`, R`espone la porta`, R`avvia l'applicazione`], R`Poi CMD la avvia.`],
+['mc', R`L'app Flask del prof ascolta sulla porta…`, [R`5000`, R`80`, R`8080`, R`22`], R`EXPOSE 5000.`],
+['mc', R`docker build -t myimg . → il punto finale indica…`, [R`la cartella con il Dockerfile`, R`l'ultima versione`, R`il container corrente`, R`la porta`], R`-t dà il nome (tag) alla image.`],
+['mc', R`Per vedere anche i container fermati:`, [R`docker ps -a`, R`docker ps`, R`docker image ls`, R`docker port`], R`docker ps mostra solo quelli in esecuzione.`],
+['mc', R`Avviando un container con un nome già usato…`, [R`errore: prima docker stop e docker rm`, R`sovrascrive il vecchio`, R`ne crea uno con nome2`, R`riavvia il vecchio`], R`Il nome è unico.`],
+['mc', R`docker run -P myimg: per sapere su che porta dell'host è finita la 5000…`, [R`docker port nomecontainer`, R`docker ps -a`, R`docker image ls`, R`ifconfig`], R`Es. 5000/tcp -> 0.0.0.0:32786.`],
+['mc', R`Aprire una shell in un container già avviato:`, [R`docker exec -it nome /bin/bash`, R`docker run -it nome`, R`docker start nome`, R`docker attach -d nome`], R`docker run crea un container nuovo.`],
+['mc', R`cgroup serve a…`, [R`limitare e monitorare le risorse di gruppi di processi`, R`cambiare la root directory`, R`isolare la rete`, R`scaricare immagini`], R`chroot cambia la root; namespaces isolano ciò che si vede.`],
+['mc', R`namespaces servono a…`, [R`dare a ogni container la sua istanza di pid, rete, …`, R`limitare la memoria`, R`compilare la image`, R`assegnare i core`], R`Limitano gli oggetti host visibili.`],
+['tf', R`Le modifiche fatte in un container si riflettono sulla image.`, false, R`La image è read-only.`],
+['tf', R`-d avvia il container in background.`, true, R`Detached.`],
+['code', R`Dockerfile per application.py (Flask).`, R`[[FROM]] ubuntu:latest
+[[RUN]] apt-get update -y
+RUN apt-get install -y python3-pip
+RUN pip install flask --break-system-packages
+[[ADD]] "application.py" "/tmp/application.py"
+[[EXPOSE]] 5000
+[[CMD]] [ "python3", "/tmp/application.py" ]`, [R`COPYFILE`, R`START`, R`PORT`], R`Poi: docker build -t myimg . e docker run.`],
+['code', R`Costruisci la image e avviala in background con le porte pubblicate.`, R`docker [[build]] [[-t]] myimg [[.]]
+docker run [[-d]] [[-P]] --name myapp myimg
+docker [[port]] myapp`, [R`-p`, R`ps`, R`exec`, R`-it`], R`Poi apri http://IP:PORTA/welcome?studente=Rossi&corso=SO.`],
+['code', R`Ferma e rimuovi il container prima di riusarne il nome.`, R`docker [[ps]] -a
+docker [[stop]] myapp
+docker [[rm]] myapp`, [R`kill`, R`image rm`, R`exec`], R`docker image rm rimuove una image, non un container.`],
+['code', R`Container Ubuntu interattivo con shell.`, R`docker run [[-it]] [[--name]] ubu1 ubuntu [[/bin/bash]]`, [R`-d`, R`-P`, R`bash.sh`], R`Il comando finale sovrascrive il CMD della image.`],
+['ord', R`Dalla app al browser: metti in ordine.`, [R`Scrivi il Dockerfile`, R`docker build -t myimg .`, R`docker run -d -P --name myapp myimg`, R`docker port myapp`, R`Apri IP:PORTA nel browser`], R`Con la VM, attenzione a NAT vs bridge.`],
+]});
+
+MODULES.push({ id: 'sec', title: 'Sicurezza e RAID', sub: 'Terminologia, ACL, livelli RAID', items: [
+['fc', R`Bug, vulnerabilità, exploit, malware`, R`**Bug**: difetto. **Vulnerabilità**: bug nella sicurezza. **Exploit**: input che attiva la vulnerabilità. **Malware**: software nocivo (virus, **worm** che si propaga da solo, **trojan** nascosto in un software lecito).`],
+['fc', R`Le 3 proprietà della sicurezza`, R`**Riservatezza** (solo utenti autorizzati), **integrità** (nessuna modifica non autorizzata), **disponibilità** (sistemi disponibili quando servono).`],
+['fc', R`Dominio di protezione`, R`Insieme di coppie (oggetto, diritti). In UNIX il dominio di un processo è definito da **UID-GID**, ereditati dalla shell. root ha **UID 0**.`],
+['fc', R`Matrice di protezione e ACL`, R`Matrice: righe = domini, colonne = oggetti. **ACL**: per ogni oggetto, lista ordinata dei domini e dei diritti. In Linux: getfacl / setfacl.`],
+['fc', R`RAID 0, 1, 4, 5, 6`, R`**0**: strip in round-robin, prestazioni, niente affidabilità. **1**: tutto duplicato. **4**: parità su un disco dedicato (collo di bottiglia). **5**: parità distribuita. **6**: come 5 con un blocco di parità in più.`],
+['mc', R`Un malware che si propaga autonomamente è un…`, [R`worm`, R`trojan`, R`exploit`, R`bug`], R`Il trojan è nascosto in un software lecito.`],
+['mc', R`Un exploit è…`, [R`l'input che attiva una vulnerabilità`, R`un difetto nel software`, R`un antivirus`, R`un tipo di RAID`], R`Vulnerabilità = bug nella sicurezza.`],
+['mc', R`L'UID di root è…`, [R`0`, R`1`, R`1000`, R`-1`], R`Può leggere e scrivere tutti i file.`],
+['mc', R`In UNIX il dominio di protezione di un processo è definito da…`, [R`UID e GID`, R`PID e PPID`, R`i permessi dell'eseguibile`, R`il ring`], R`Processi con gli stessi UID-GID accedono agli stessi oggetti.`],
+['mc', R`Per vedere l'ACL di un file in Linux:`, [R`getfacl`, R`ls -i`, R`chmod`, R`id`], R`setfacl la modifica.`],
+['mc', R`RAID 0 offre…`, [R`prestazioni, ma nessuna affidabilità`, R`affidabilità, ma prestazioni basse`, R`parità distribuita`, R`mirroring`], R`Se si rompe un disco si perdono i dati.`],
+['mc', R`RAID 1 consiste in…`, [R`duplicare tutti i dischi`, R`parità su un disco`, R`strip senza ridondanza`, R`doppia parità`], R`In lettura si può usare qualsiasi copia.`],
+['mc', R`Nel RAID 4 il collo di bottiglia è…`, [R`l'unità di parità`, R`il controller`, R`il disco più piccolo`, R`la cache`], R`RAID 5 distribuisce la parità per evitarlo.`],
+['mc', R`RAID 5:`, [R`parità distribuita tra tutte le unità in round-robin`, R`parità su un'unità dedicata`, R`duplicazione`, R`nessuna parità`], R`RAID 6 aggiunge un secondo blocco di parità.`],
+['mc', R`Il SO vede un RAID come…`, [R`un singolo disco`, R`tanti dischi separati`, R`una partizione per disco`, R`un file system di rete`], R`È il RAID a distribuire i dati.`],
+['mc', R`Riservatezza significa…`, [R`accesso garantito solo agli utenti autorizzati`, R`nessuna modifica non autorizzata`, R`sistemi disponibili quando servono`, R`backup frequenti`], R`Integrità e disponibilità sono le altre due.`],
+['tf', R`RAID 0 sopravvive al guasto di un disco.`, false, R`Nessuna ridondanza.`],
+['tf', R`La parità del RAID 4 è lo XOR di tutte le strip.`, true, R`Permette di ricalcolare un'unità persa.`],
+['tf', R`Un file eredita UID-GID del processo che lo crea.`, true, R`Con i permessi decisi da quel processo.`],
+]});
+
+</script>
+<script>
+(function(){
+"use strict";
+const EXAM = new Date(2026, 10, 3);
+const KEY = 'so-tascabile.v1';
+const DAY = 864e5;
+const INTERVALS = [0, 10*60e3, 6*3600e3, DAY, 2*DAY, 4*DAY];
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+function hash(s){ let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+
+/* ---------- items ---------- */
+const ITEMS = [];
+const BYMOD = {};
+const KINDNAME = {fc:'Flashcard', mc:'Crocetta', tf:'Vero o falso', fill:'Completa', code:'Codice da completare', ord:'Metti in ordine', num:'Calcola'};
+MODULES.forEach((m, mi) => {
+  m.n = mi + 1; BYMOD[m.id] = [];
+  m.items.forEach(raw => {
+    const k = raw[0]; let it = { k, mod: m.id };
+    if (k === 'fc') { it.q = raw[1]; it.a = raw[2]; }
+    else if (k === 'mc') { it.q = raw[1]; it.opts = raw[2]; it.why = raw[3]; }
+    else if (k === 'tf') { it.q = raw[1]; it.ans = raw[2]; it.why = raw[3]; }
+    else if (k === 'fill') { it.text = raw[1]; it.q = raw[1]; it.dis = raw[2]; it.why = raw[3]; }
+    else if (k === 'code') { it.q = raw[1]; it.text = raw[2]; it.dis = raw[3]; it.why = raw[4]; }
+    else if (k === 'ord') { it.q = raw[1]; it.steps = raw[2]; it.why = raw[3]; }
+    else if (k === 'num') { it.q = raw[1]; it.ans = raw[2]; it.why = raw[3]; it.tol = raw[4] || 0.001; }
+    it.id = m.id + '.' + k + '.' + hash((it.q || '') + '|' + (it.text || ''));
+    ITEMS.push(it); BYMOD[m.id].push(it);
+  });
+});
+const MOD = Object.fromEntries(MODULES.map(m => [m.id, m]));
+
+/* ---------- state ---------- */
+let S = { items:{}, days:{}, goal:100, sound:true, updated:0 };
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch(e) {}
+function saveLocal(){ S.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+const st = id => S.items[id];
+const totalXP = () => Object.values(S.days).reduce((a, b) => a + b, 0);
+function addXP(n){ const d = today(); S.days[d] = (S.days[d] || 0) + n; }
+function streak(){
+  let n = 0; const d = new Date();
+  const key = x => x.getFullYear() + '-' + String(x.getMonth()+1).padStart(2,'0') + '-' + String(x.getDate()).padStart(2,'0');
+  if (!S.days[key(d)]) d.setDate(d.getDate() - 1);
+  while (S.days[key(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function record(it, ok){
+  const now = Date.now(); const r = S.items[it.id] || { b:0, d:0, s:0, w:0, l:0 };
+  r.s++; r.l = now;
+  if (ok) { r.b = Math.min(r.b + 1, 5); r.d = now + INTERVALS[r.b]; }
+  else { r.b = 0; r.d = now; r.w++; }
+  S.items[it.id] = r;
+}
+function mastery(list){ if (!list.length) return 0; let s = 0; list.forEach(it => { const r = st(it.id); s += r ? Math.min(r.b, 4) : 0; }); return Math.round(100 * s / (4 * list.length)); }
+
+/* remote sync (per-viewer, private) */
+let remote = null, saving = Promise.resolve();
+function merge(a, b){
+  const out = Object.assign({}, a, { items: Object.assign({}, a.items), days: Object.assign({}, a.days) });
+  for (const [id, r] of Object.entries(b.items || {})) { const x = out.items[id]; if (!x || (r.l || 0) > (x.l || 0)) out.items[id] = r; }
+  for (const [d, v] of Object.entries(b.days || {})) out.days[d] = Math.max(out.days[d] || 0, v);
+  if ((b.updated || 0) > (a.updated || 0)) { out.goal = b.goal || out.goal; out.sound = b.sound !== undefined ? b.sound : out.sound; }
+  out.updated = Math.max(a.updated || 0, b.updated || 0);
+  return out;
+}
+function saveRemote(){
+  if (!remote) return;
+  const snap = JSON.parse(JSON.stringify(S));
+  saving = saving.then(() => remote.set(snap)).then(() => setSync('Progressi salvati anche nel tuo account')).catch(() => setSync('Progressi salvati su questo dispositivo'));
+}
+function setSync(t){ const el = $('#syncNote'); if (el) el.textContent = t; }
+(async function connect(){
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const [user, db] = await Promise.all([window.claude.use('user'), window.claude.use('db')]);
+    if (!user || !db) return;
+    const id = await user.id(); if (!id) return;
+    remote = db.doc('data/users/' + id + '/progress');
+    const snap = await remote.get();
+    if (snap.exists) { S = merge(S, snap.data()); saveLocal(); if (!$('#home').hidden) renderHome(); }
+    saveRemote();
+  } catch(e) { remote = null; }
+})();
+
+/* ---------- sound + haptics ---------- */
+let actx = null;
+function tone(ok){
+  if (!S.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const notes = ok ? [660, 990] : [220, 180]; let t = actx.currentTime;
+    notes.forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = ok ? 'sine' : 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i*0.09); g.gain.exponentialRampToValueAtTime(0.18, t + i*0.09 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i*0.09 + 0.16); o.connect(g).connect(actx.destination); o.start(t + i*0.09); o.stop(t + i*0.09 + 0.2); });
+  } catch(e) {}
+  try { navigator.vibrate && navigator.vibrate(ok ? 12 : [30, 40, 30]); } catch(e) {}
+}
+function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 1800); }
+
+/* ---------- selection ---------- */
+function pick(pool, k, opt = {}){
+  const now = Date.now(); const due = [], fresh = [], later = [];
+  shuffle(pool).forEach(it => { const r = st(it.id); if (!r) fresh.push(it); else if (r.d <= now) due.push(it); else later.push(it); });
+  due.sort((a, b) => st(a.id).b - st(b.id).b);
+  later.sort((a, b) => st(a.id).d - st(b.id).d);
+  const out = []; const maxFc = opt.maxFc ?? 1; let fc = 0;
+  const take = (arr, lim) => { for (const it of arr) { if (out.length >= lim) break; if (out.includes(it)) continue; if (it.k === 'fc' && fc >= maxFc) continue; if (it.k === 'fc') fc++; out.push(it); } };
+  take(due, Math.ceil(k * 0.6)); take(fresh, k); take(due, k); take(later, k);
+  return shuffle(out);
+}
+const errorPool = () => ITEMS.filter(it => { const r = st(it.id); return r && r.w > 0 && r.b < 3; });
+
+/* ---------- screens ---------- */
+function show(id){ ['home','lesson','result'].forEach(s => $('#' + s).hidden = s !== id); window.scrollTo(0, 0); }
+
+function renderHome(){
+  const xp = totalXP(), tod = S.days[today()] || 0, sk = streak();
+  $('#xpN').textContent = xp; $('#streakN').textContent = sk;
+  $('#streakPill').classList.toggle('off', !S.days[today()]);
+  $('#goalTxt').textContent = Math.min(tod, S.goal) + '/' + S.goal + ' XP oggi';
+  $('#goalBar').style.width = Math.min(100, 100 * tod / S.goal) + '%';
+  const now = new Date(); const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const days = Math.round((EXAM - d0) / DAY);
+  $('#examTxt').innerHTML = days > 1 ? 'Esame tra <b>' + days + ' giorni</b>' : days === 1 ? 'Esame <b>domani</b>' : days === 0 ? 'Esame <b>oggi</b>: in bocca al lupo' : 'Esame del 3 novembre passato';
+  const errs = errorPool().length;
+  $('#errD').textContent = errs ? errs + (errs === 1 ? ' domanda sbagliata' : ' domande sbagliate') + ' da sistemare' : 'Nessun errore per ora';
+  $('#mErr').disabled = !errs;
+  const dueN = ITEMS.filter(it => { const r = st(it.id); return r && r.d <= Date.now() && r.b < 5; }).length;
+  $('#heroTxt').textContent = dueN ? dueN + ' domande sono pronte da ripassare. Ne prendo 5, le più deboli.' : 'Cinque domande dai punti che ricordi meno. Perfetta mentre aspetti.';
+  $('#overall').textContent = mastery(ITEMS) + '% padroneggiato';
+  const offs = [0, 44, 62, 44, 0, -44, -62, -44];
+  $('#path').innerHTML = MODULES.map((m, i) => {
+    const p = mastery(BYMOD[m.id]); const seen = BYMOD[m.id].some(it => st(it.id));
+    const cls = p >= 85 ? 'done' : seen ? 'started' : '';
+    return '<button class="unit" data-m="' + m.id + '" style="transform:translateX(' + offs[i % 8] + 'px)">' +
+      '<span class="node ' + cls + '" style="--p:' + p + ';--ring:' + (p >= 85 ? 'var(--gold)' : 'var(--accent)') + '"><span class="core">' + (p >= 85 ? '★' : m.n) + '</span></span>' +
+      (m.practice ? '<span class="tag">Pratica</span>' : '') +
+      '<span class="nm">' + esc(m.title) + '</span><span class="pc">' + p + '%</span></button>';
+  }).join('');
+}
+$('#path').addEventListener('click', e => { const u = e.target.closest('.unit'); if (u) openUnit(u.dataset.m); });
+
+/* sheet */
+function openSheet(html){ $('#sheetArea').innerHTML = '<div class="grab"></div>' + html; const sc = $('#scrim'); sc.hidden = false; requestAnimationFrame(() => { sc.classList.add('on'); $('#sheet').classList.add('on'); }); }
+function closeSheet(){ $('#scrim').classList.remove('on'); $('#sheet').classList.remove('on'); setTimeout(() => $('#scrim').hidden = true, 220); }
+$('#scrim').addEventListener('click', closeSheet);
+
+function openUnit(id){
+  const m = MOD[id], list = BYMOD[id], p = mastery(list);
+  const seen = list.filter(it => st(it.id)).length;
+  const due = list.filter(it => { const r = st(it.id); return r && r.d <= Date.now(); }).length;
+  const fcs = list.filter(it => it.k === 'fc').length, codes = list.filter(it => it.k === 'code' || it.k === 'ord' || it.k === 'num').length;
+  openSheet('<div class="label">Modulo ' + m.n + (m.practice ? ' · pratica' : '') + '</div><h2>' + esc(m.title) + '</h2><div class="sub">' + esc(m.sub) + '</div>' +
+    '<div class="meter"><i style="width:' + p + '%"></i></div>' +
+    '<div class="stats3"><div class="stat"><b>' + p + '%</b><span>padronanza</span></div><div class="stat"><b>' + seen + '/' + list.length + '</b><span>viste</span></div><div class="stat"><b>' + due + '</b><span>da ripassare</span></div></div>' +
+    '<div class="stack"><button class="btn" data-a="lesson">Lezione · 8 domande</button>' +
+    (fcs ? '<button class="btn ghost" data-a="fc">Flashcard · ' + fcs + '</button>' : '') +
+    (codes ? '<button class="btn ghost" data-a="prat">' + (m.practice ? 'Solo esercizi di codice' : 'Solo esercizi e calcoli') + ' · ' + codes + '</button>' : '') +
+    '<button class="btn ghost" data-a="all">Ripasso lungo · 15 domande</button></div>');
+  $('#sheetArea').onclick = e => {
+    const a = e.target.closest('[data-a]'); if (!a) return; closeSheet();
+    const A = a.dataset.a;
+    if (A === 'lesson') startLesson(pick(list, 8), { title: m.title });
+    else if (A === 'all') startLesson(pick(list, 15, { maxFc: 2 }), { title: m.title });
+    else if (A === 'fc') startCards(pick(list.filter(it => it.k === 'fc'), 30, { maxFc: 99 }), m.title);
+    else if (A === 'prat') startLesson(pick(list.filter(it => it.k === 'code' || it.k === 'ord' || it.k === 'num'), 8), { title: m.title });
+  };
+}
+
+function openSettings(){
+  openSheet('<h2>Impostazioni</h2><div class="sub">Obiettivo, suoni e azzeramento.</div>' +
+    '<div class="setrow"><span>Obiettivo giornaliero</span><div class="seg" id="sGoal">' + [50,100,200].map(g => '<button data-g="' + g + '" aria-pressed="' + (S.goal === g) + '">' + g + '</button>').join('') + '</div></div>' +
+    '<div class="setrow"><span>Suoni e vibrazione</span><div class="seg" id="sSnd"><button data-s="1" aria-pressed="' + S.sound + '">Sì</button><button data-s="0" aria-pressed="' + !S.sound + '">No</button></div></div>' +
+    '<div class="setrow" style="border:0"><span>Domande nella banca</span><b>' + ITEMS.length + '</b></div>' +
+    '<div class="stack" style="margin-top:8px"><button class="btn ghost" id="sReset">Azzera i progressi</button><div id="sConfirm" hidden><p class="muted" style="margin:0 0 10px;font-size:14px">Cancello XP, serie e padronanza di tutte le domande. Non si torna indietro.</p><button class="btn bad" id="sReset2">Sì, azzera tutto</button></div></div>');
+  $('#sheetArea').onclick = e => {
+    const g = e.target.closest('[data-g]'), s = e.target.closest('[data-s]');
+    if (g) { S.goal = +g.dataset.g; saveLocal(); saveRemote(); openSettings(); renderHome(); }
+    else if (s) { S.sound = s.dataset.s === '1'; saveLocal(); saveRemote(); openSettings(); }
+    else if (e.target.id === 'sReset') { $('#sConfirm').hidden = false; }
+    else if (e.target.id === 'sReset2') { S.items = {}; S.days = {}; saveLocal(); saveRemote(); closeSheet(); renderHome(); toast('Progressi azzerati'); }
+  };
+}
+$('#setBtn').onclick = openSettings;
+
+$('#quickBtn').onclick = () => startLesson(pick(ITEMS, 5), { title: 'Pausa veloce' });
+$('#mErr').onclick = () => { const p = errorPool().sort((a, b) => st(a.id).b - st(b.id).b); startLesson(shuffle(p.slice(0, 10)), { title: 'Errori' }); };
+$('#mFc').onclick = () => startCards(pick(ITEMS.filter(it => it.k === 'fc'), 15, { maxFc: 99 }), 'Tutto il corso');
+$('#mSim').onclick = () => startLesson(pick(ITEMS.filter(it => it.k === 'mc' || it.k === 'tf'), 20), { title: 'Simulazione', exam: true });
+$('#mPrat').onclick = () => startLesson(pick(ITEMS.filter(it => MOD[it.mod].practice && (it.k === 'code' || it.k === 'ord' || it.k === 'num')), 6), { title: 'Prova pratica' });
+
+/* ---------- lesson engine ---------- */
+let L = null;
+function startLesson(items, opt){
+  if (!items.length) { toast('Niente da fare qui per ora'); return; }
+  L = { queue: items.map(it => ({ it, retry: false })), base: items.length, done: 0, pos: 0, correct: 0, first: 0, xp: 0, combo: 0, best: 0, wrong: [], t0: Date.now(), opt };
+  show('lesson'); next();
+}
+$('#quitBtn').onclick = () => { if (L && L.xp) { saveLocal(); saveRemote(); } L = null; renderHome(); show('home'); };
+
+function setProg(){ $('#progBar').style.width = (100 * L.done / L.base) + '%'; $('#combo').textContent = L.combo >= 3 ? L.combo + '× di fila' : ''; }
+
+function next(){
+  setProg(); hideFb();
+  if (L.pos >= L.queue.length) return finish();
+  const cur = L.queue[L.pos]; const it = cur.it;
+  const qa = $('#qArea'), fa = $('#footArea');
+  qa.innerHTML = '<div class="kind"><span class="label">' + (cur.retry ? 'Riprova · ' : '') + KINDNAME[it.k] + '</span><span class="modtag">' + esc(MOD[it.mod].title) + '</span></div>';
+  fa.innerHTML = '';
+  const ui = RENDER[it.k](it, qa);
+  L.ui = ui;
+  if (it.k === 'fc') {
+    fa.innerHTML = '<button class="btn" id="revealBtn">Mostra la risposta</button>';
+    $('#revealBtn').onclick = () => { ui.reveal(); fa.innerHTML = '<div class="two"><button class="btn bad" id="noBtn">Non la sapevo</button><button class="btn ok" id="yesBtn">La sapevo</button></div>'; $('#noBtn').onclick = () => grade(false); $('#yesBtn').onclick = () => grade(true); };
+  } else {
+    fa.innerHTML = '<button class="btn" id="checkBtn" disabled>Verifica</button>';
+    $('#checkBtn').onclick = () => { if (ui.ready()) grade(ui.check()); };
+    ui.onChange = () => { $('#checkBtn').disabled = !ui.ready(); };
+  }
+  $('.lbody').scrollTop = 0;
+}
+
+function grade(ok){
+  const cur = L.queue[L.pos]; const it = cur.it;
+  record(it, ok); tone(ok);
+  if (ok) {
+    L.combo++; L.best = Math.max(L.best, L.combo); L.correct++;
+    if (!cur.retry) L.first++;
+    let g = it.k === 'fc' ? 5 : cur.retry ? 5 : 10; if (L.combo > 0 && L.combo % 5 === 0) g += 5;
+    L.xp += g; addXP(g); L.done++;
+  } else {
+    L.combo = 0;
+    if (!L.wrong.includes(it)) L.wrong.push(it);
+    if (!cur.retry && !L.opt.exam) L.queue.push({ it, retry: true }); else L.done++;
+  }
+  saveLocal(); setProg();
+  if (it.k === 'fc') { L.pos++; return next(); }
+  showFb(ok, it);
+}
+
+const PRAISE = ['Giusto!', 'Perfetto!', 'Esatto!', 'Ottimo!', 'Bravo!', 'Proprio così!'];
+function showFb(ok, it){
+  const fb = $('#fb'); fb.className = 'fb ' + (ok ? 'good' : 'bad');
+  $('#fbTitle').innerHTML = ok ? PRAISE[Math.floor(Math.random() * PRAISE.length)] : 'Non proprio';
+  const sol = ok ? '' : solution(it);
+  $('#fbSol').textContent = sol ? 'Risposta: ' + sol : '';
+  $('#fbSol').className = 'sol' + (it.k === 'code' ? ' mono' : '');
+  $('#fbWhy').innerHTML = it.why ? md(it.why) : '';
+  $('#fbBtn').className = 'btn ' + (ok ? 'ok' : 'bad');
+  requestAnimationFrame(() => fb.classList.add('on'));
+  $('#fbBtn').focus({ preventScroll: true });
+}
+function hideFb(){ $('#fb').classList.remove('on'); }
+$('#fbBtn').onclick = () => { L.pos++; next(); };
+
+function solution(it){
+  if (it.k === 'mc') return it.opts[0];
+  if (it.k === 'tf') return it.ans ? 'Vero' : 'Falso';
+  if (it.k === 'fill' || it.k === 'code') return blanks(it.text).join('  ·  ');
+  if (it.k === 'ord') return it.steps.map((s, i) => (i + 1) + '. ' + s).join('\n');
+  if (it.k === 'num') return String(it.ans).replace('.', ',');
+  return '';
+}
+const BL = /\[\[(.+?)\]\](?!\])/g;
+const blanks = t => [...t.matchAll(BL)].map(m => m[1]);
+
+/* renderers */
+const RENDER = {
+  fc(it, el){
+    el.insertAdjacentHTML('beforeend', '<div class="card"><div class="front">' + md(it.q) + '</div><div class="back" id="fcBack" hidden>' + md(it.a) + '</div></div><p class="muted" style="font-size:14px;margin-top:14px">Rispondi a voce, poi controlla.</p>');
+    return { reveal(){ $('#fcBack').hidden = false; } };
+  },
+  mc(it, el){
+    const opts = shuffle(it.opts.map((t, i) => ({ t, ok: i === 0 })));
+    el.insertAdjacentHTML('beforeend', '<p class="q' + (it.q.length > 110 ? ' small' : '') + '">' + md(it.q) + '</p><div class="opts">' + opts.map((o, i) => '<button class="opt" data-i="' + i + '" aria-pressed="false"><span class="k">' + 'ABCD'[i] + '</span><span>' + esc(o.t) + '</span></button>').join('') + '</div>');
+    let sel = -1; const ui = { ready: () => sel >= 0, check(){ const bs = el.querySelectorAll('.opt'); bs.forEach((b, i) => { b.disabled = true; if (opts[i].ok) b.classList.add('right'); else if (i === sel) b.classList.add('wrong'); }); return opts[sel].ok; } };
+    el.querySelector('.opts').onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; sel = +b.dataset.i; el.querySelectorAll('.opt').forEach(x => x.setAttribute('aria-pressed', x === b)); ui.onChange && ui.onChange(); };
+    return ui;
+  },
+  tf(it, el){
+    el.insertAdjacentHTML('beforeend', '<p class="q">' + md(it.q) + '</p><div class="tfrow"><button class="opt" data-v="1" aria-pressed="false">Vero</button><button class="opt" data-v="0" aria-pressed="false">Falso</button></div>');
+    let sel = null; const ui = { ready: () => sel !== null, check(){ el.querySelectorAll('.opt').forEach(b => { b.disabled = true; const v = b.dataset.v === '1'; if (v === it.ans) b.classList.add('right'); else if (v === sel) b.classList.add('wrong'); }); return sel === it.ans; } };
+    el.querySelector('.tfrow').onclick = e => { const b = e.target.closest('.opt'); if (!b || b.disabled) return; sel = b.dataset.v === '1'; el.querySelectorAll('.opt').forEach(x => x.setAttribute('aria-pressed', x === b)); ui.onChange && ui.onChange(); };
+    return ui;
+  },
+  fill(it, el){ return blankUI(it, el, false); },
+  code(it, el){ return blankUI(it, el, true); },
+  ord(it, el){
+    const pool = shuffle(it.steps.map((t, i) => ({ t, i })));
+    el.insertAdjacentHTML('beforeend', '<p class="q small">' + md(it.q) + '</p><div class="ordans" id="oAns"></div><div class="ordpool" id="oPool">' + pool.map((s, k) => '<button class="ordit" data-k="' + k + '"><span>' + esc(s.t) + '</span></button>').join('') + '</div>');
+    const ans = []; const A = el.querySelector('#oAns'), P = el.querySelector('#oPool');
+    const draw = () => { A.innerHTML = ans.map((k, j) => '<button class="ordit" data-k="' + k + '"><span class="n">' + (j + 1) + '</span><span>' + esc(pool[k].t) + '</span></button>').join(''); P.querySelectorAll('.ordit').forEach(b => b.classList.toggle('used', ans.includes(+b.dataset.k))); ui.onChange && ui.onChange(); };
+    const ui = { ready: () => ans.length === pool.length, check(){ let ok = true; A.querySelectorAll('.ordit').forEach((b, j) => { const good = pool[+b.dataset.k].i === j; b.classList.add(good ? 'right' : 'wrong'); b.disabled = true; if (!good) ok = false; }); return ok; } };
+    P.onclick = e => { const b = e.target.closest('.ordit'); if (!b || b.disabled) return; ans.push(+b.dataset.k); draw(); };
+    A.onclick = e => { const b = e.target.closest('.ordit'); if (!b || b.disabled) return; ans.splice(ans.indexOf(+b.dataset.k), 1); draw(); };
+    return ui;
+  },
+  num(it, el){
+    const nl = it.q.indexOf('\n');
+    const head = nl > 0 ? it.q.slice(0, nl) : it.q, code = nl > 0 ? it.q.slice(nl + 1) : '';
+    el.insertAdjacentHTML('beforeend', '<p class="q' + (head.length > 110 ? ' small' : '') + '">' + md(head) + '</p>' + (code ? '<pre class="code">' + esc(code) + '</pre>' : '') + '<div class="numin"><input id="numIn" type="text" inputmode="decimal" autocomplete="off" placeholder="?" aria-label="Risposta"></div>');
+    const inp = el.querySelector('#numIn');
+    const val = () => parseFloat(inp.value.replace(',', '.').replace('−', '-').trim());
+    const ui = { ready: () => !isNaN(val()), check(){ inp.disabled = true; const ok = Math.abs(val() - it.ans) <= it.tol; inp.style.borderColor = ok ? 'var(--ok)' : 'var(--bad)'; return ok; } };
+    inp.oninput = () => ui.onChange && ui.onChange();
+    inp.onkeydown = e => { if (e.key === 'Enter' && ui.ready()) { e.preventDefault(); inp.blur(); grade(ui.check()); } };
+    return ui;
+  }
+};
+
+function blankUI(it, el, isCode){
+  const ans = blanks(it.text);
+  const dis = (it.dis || []).filter(d => !ans.includes(d));
+  const chips = shuffle(ans.concat(dis)).map((t, i) => ({ t, i }));
+  let html = ''; let last = 0, bi = 0;
+  for (const m of it.text.matchAll(BL)) {
+    html += esc(it.text.slice(last, m.index));
+    html += '<button class="slot" data-b="' + bi + '" style="min-width:' + (Math.max(3, m[1].length) + 1) + 'ch">&nbsp;</button>';
+    last = m.index + m[0].length; bi++;
+  }
+  html += esc(it.text.slice(last));
+  el.insertAdjacentHTML('beforeend', (isCode ? '<p class="q small">' + md(it.q) + '</p><pre class="code">' + html + '</pre>' : '<p class="fillq">' + html.replace(/\n/g, '<br>') + '</p>') +
+    '<div class="bank">' + chips.map(c => '<button class="chip' + (isCode ? ' mono' : '') + '" data-c="' + c.i + '">' + esc(c.t) + '</button>').join('') + '</div>');
+  const fill = new Array(ans.length).fill(null);
+  const slots = el.querySelectorAll('.slot'), chipEls = el.querySelectorAll('.chip');
+  const draw = () => {
+    slots.forEach((s, i) => { const c = fill[i]; s.textContent = c === null ? ' ' : chips.find(x => x.i === c).t; s.classList.toggle('filled', c !== null); });
+    chipEls.forEach(ch => ch.classList.toggle('used', fill.includes(+ch.dataset.c)));
+    ui.onChange && ui.onChange();
+  };
+  const ui = { ready: () => fill.every(x => x !== null), check(){
+    let ok = true;
+    slots.forEach((s, i) => { s.disabled = true; const good = chips.find(x => x.i === fill[i]).t === ans[i]; s.classList.remove('filled'); s.classList.add(good ? 'right' : 'wrong'); if (!good) ok = false; });
+    chipEls.forEach(c => c.disabled = true); return ok; } };
+  el.querySelector('.bank').onclick = e => { const ch = e.target.closest('.chip'); if (!ch || ch.disabled) return; const k = fill.indexOf(null); if (k < 0) return; fill[k] = +ch.dataset.c; draw(); };
+  slots.forEach(s => s.onclick = () => { if (s.disabled) return; fill[+s.dataset.b] = null; draw(); });
+  return ui;
+}
+
+function finish(){
+  const secs = Math.round((Date.now() - L.t0) / 1000);
+  const acc = Math.round(100 * L.first / L.base);
+  saveLocal(); saveRemote();
+  const exam = L.opt.exam;
+  const head = exam ? (L.first + '/' + L.base) : '+' + L.xp;
+  const title = exam ? (acc >= 80 ? 'Pronto per lo scritto' : acc >= 60 ? 'Ci sei quasi' : 'Ancora un giro') : acc >= 90 ? 'Lezione perfetta' : acc >= 60 ? 'Lezione completata' : 'Fatto, gli errori tornano dopo';
+  const rev = L.wrong.length ? '<div class="review"><div class="label">Da rivedere</div><ul>' + L.wrong.slice(0, 8).map(it => '<li><b>' + esc(trim(it.q)) + '</b><br><span class="muted">' + esc(trim(solution(it), 140)) + '</span></li>').join('') + '</ul></div>' : '';
+  $('#resArea').innerHTML = '<div class="burst">' + head + '</div><div class="big">' + title + '</div><div class="muted">' + esc(L.opt.title) + (exam ? ' · risposte giuste al primo colpo' : ' · XP guadagnati') + '</div>' +
+    '<div class="stats3"><div class="stat"><b>' + acc + '%</b><span>precisione</span></div><div class="stat"><b>' + fmtT(secs) + '</b><span>tempo</span></div><div class="stat"><b>' + L.best + '</b><span>serie migliore</span></div></div>' + rev +
+    '<div class="stack"><button class="btn" id="resHome">Continua</button>' + (L.wrong.length ? '<button class="btn ghost" id="resAgain">Rifai subito gli errori</button>' : '') + '</div>';
+  const wrong = L.wrong.slice(); L = null;
+  $('#resHome').onclick = () => { renderHome(); show('home'); };
+  const ra = $('#resAgain'); if (ra) ra.onclick = () => startLesson(shuffle(wrong), { title: 'Errori di questa lezione' });
+  show('result');
+}
+const trim = (s, n = 90) => { s = String(s).replace(/\*\*/g, '').replace(/\s+/g, ' '); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+const fmtT = s => s < 60 ? s + 's' : Math.floor(s / 60) + 'm ' + String(s % 60).padStart(2, '0') + 's';
+
+/* ---------- flashcards ---------- */
+let C = null;
+function startCards(list, title){
+  if (!list.length) { toast('Nessuna flashcard qui'); return; }
+  C = { list, i: 0, known: 0, xp: 0, title, t0: Date.now() };
+  show('lesson'); hideFb(); drawCard();
+}
+function drawCard(){
+  if (C.i >= C.list.length) return endCards();
+  const it = C.list[C.i];
+  $('#progBar').style.width = (100 * C.i / C.list.length) + '%'; $('#combo').textContent = (C.i + 1) + '/' + C.list.length;
+  $('#qArea').innerHTML = '<div class="kind"><span class="label">Flashcard</span><span class="modtag">' + esc(MOD[it.mod].title) + '</span></div><div class="deck"><div class="fcard" id="fcard" role="button" tabindex="0" aria-label="Gira la carta">' +
+    '<div class="face"><span class="mt">Domanda</span><div class="ft">' + md(it.q) + '</div><div class="hint">Tocca per girare</div></div>' +
+    '<div class="face b"><span class="mt">Risposta</span><div class="bt">' + md(it.a) + '</div></div></div></div>';
+  const card = $('#fcard'); let flipped = false;
+  const flip = () => { flipped = !flipped; card.classList.toggle('flip', flipped); if (flipped) btns(); };
+  card.onclick = flip; card.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
+  // altezza: adatta alla faccia più lunga
+  requestAnimationFrame(() => { const h = Math.max(...[...card.querySelectorAll('.face')].map(f => f.scrollHeight)); card.style.minHeight = Math.max(340, h) + 'px'; });
+  let sx = null; card.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  card.addEventListener('touchend', e => { if (sx === null || !flipped) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 70) cardGrade(dx > 0); });
+  $('#footArea').innerHTML = '<button class="btn ghost" id="flipBtn">Gira la carta</button>';
+  $('#flipBtn').onclick = flip;
+  function btns(){ $('#footArea').innerHTML = '<div class="two"><button class="btn bad" id="cNo">Da ripassare</button><button class="btn ok" id="cYes">La so</button></div>'; $('#cNo').onclick = () => cardGrade(false); $('#cYes').onclick = () => cardGrade(true); }
+}
+function cardGrade(ok){ const it = C.list[C.i]; record(it, ok); if (ok) { C.known++; C.xp += 5; addXP(5); } saveLocal(); try { navigator.vibrate && navigator.vibrate(8); } catch(e) {} C.i++; drawCard(); }
+function endCards(){
+  saveLocal(); saveRemote();
+  const n = C.list.length, k = C.known, secs = Math.round((Date.now() - C.t0) / 1000);
+  $('#resArea').innerHTML = '<div class="burst">' + k + '/' + n + '</div><div class="big">' + (k === n ? 'Le sai tutte' : 'Mazzo finito') + '</div><div class="muted">' + esc(C.title) + ' · carte che sapevi</div>' +
+    '<div class="stats3"><div class="stat"><b>+' + C.xp + '</b><span>XP</span></div><div class="stat"><b>' + fmtT(secs) + '</b><span>tempo</span></div><div class="stat"><b>' + (n - k) + '</b><span>da ripassare</span></div></div>' +
+    '<div class="stack"><button class="btn" id="resHome">Continua</button></div>';
+  C = null; $('#resHome').onclick = () => { renderHome(); show('home'); };
+  show('result');
+}
+const quit0 = $('#quitBtn').onclick;
+$('#quitBtn').onclick = () => { if (C) { saveLocal(); saveRemote(); C = null; renderHome(); show('home'); return; } quit0(); };
+
+renderHome(); show('home');
+})();
+</script>
+
+</body>
+</html>
